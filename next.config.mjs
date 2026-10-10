@@ -1,4 +1,4 @@
-/** @type {import('next').NextConfig} */
+/ @type {import('next').NextConfig} */
 const nextConfig = {
   poweredByHeader: false,
   images: {
@@ -7,7 +7,7 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "**.githubusercontent.com",
+        hostname: ".githubusercontent.com",
       },
       {
         protocol: "https",
