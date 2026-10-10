@@ -29,7 +29,7 @@ const DEPARTAMENTOS_PERU = [
   "Tacna",
   "Tumbes",
   "Ucayali",
-]
+];
 
 const initialFormData = {
   nombre: "",
@@ -49,73 +49,136 @@ const initialFormData = {
   checkReclamoForm: false,
   aceptaPoliticaPrivacidad: false,
   estado: "Pendiente",
-}
+};
 
 export default function Page() {
-  const [formData, setFormData] = useState(initialFormData)
-  const [errors, setErrors] = useState({})
-  const [status, setStatus] = useState(null)
+  const [formData, setFormData] = useState(initialFormData);
+  const [errors, setErrors] = useState({});
+  const [status, setStatus] = useState(null);
 
   const handleChange = (e) => {
-  const { name, value } = e.target
-  const cleanValue = name === "montoReclamado" ? value.replace(/-/g, "") : value
-  setFormData((prevData) => ({ ...prevData, [name]: cleanValue }))
-  // se limpia el error del campo
-  if (errors[name]) {
-    setErrors((prev) => ({ ...prev, [name]: null }))
-  }
-}
+    const { name, value } = e.target;
+    const cleanValue =
+      name === "montoReclamado" ? value.replace(/-/g, "") : value;
+    setFormData((prevData) => ({ ...prevData, [name]: cleanValue }));
+    // se limpia el error del campo
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: null }));
+    }
+  };
 
   const handleCheckboxChange = (e) => {
-    const { name, checked } = e.target
-    setFormData((prev) => ({ ...prev, [name]: checked }))
+    const { name, checked } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: checked }));
     if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: null }))
+      setErrors((prev) => ({ ...prev, [name]: null }));
     }
-  }
+  };
 
   // Validaciones generales
-const rules = [
-  { field: "nombre", test: (v) => v.trim() !== "", message: "El nombre es obligatorio." },
-  { field: "apellido", test: (v) => v.trim() !== "", message: "El apellido es obligatorio." },
-  { field: "tipoDocumento", test: (v) => v !== "", message: "Debes indicar el tipo de documento." },
-  { field: "email", test: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), message: "El email no tiene un formato válido." },
-  { field: "telefono", test: (v) => /^\d{6,15}$/.test(v), message: "El teléfono debe tener entre 6 y 15 dígitos." },
-  { field: "departamento", test: (v) => v.trim() !== "", message: "El departamento es obligatorio." },
-  { field: "direccion", test: (v) => v.trim() !== "", message: "La dirección es obligatoria." },
-  { field: "distrito", test: (v) => v.trim() !== "", message: "El distrito es obligatorio." },
-  { field: "id_servicio", test: (v) => v !== "", message: "Debes seleccionar un servicio." },
-  { field: "tipoReclamo", test: (v) => v !== "", message: "Debes indicar si es un reclamo o una queja." },
-  { field: "fechaIncidente", test: (v) => v !== "" && new Date(v) <= new Date(), message: "La fecha no es válida." },
-  { field: "descripcionServicio", test: (v) => v.trim().length >= 20 && v.length <= 1050, message: "La descripción debe tener entre 20 y 1050 caracteres." },
-  { field: "checkReclamoForm", test: (v) => v === true, message: "Debes confirmar que los datos son veraces." },
-  { field: "aceptaPoliticaPrivacidad", test: (v) => v === true, message: "Debes aceptar la política de privacidad." },
-]
+  const rules = [
+    {
+      field: "nombre",
+      test: (v) => v.trim() !== "",
+      message: "El nombre es obligatorio.",
+    },
+    {
+      field: "apellido",
+      test: (v) => v.trim() !== "",
+      message: "El apellido es obligatorio.",
+    },
+    {
+      field: "tipoDocumento",
+      test: (v) => v !== "",
+      message: "Debes indicar el tipo de documento.",
+    },
+    {
+      field: "email",
+      test: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),
+      message: "El email no tiene un formato válido.",
+    },
+    {
+      field: "telefono",
+      test: (v) => /^\d{6,15}$/.test(v),
+      message: "El teléfono debe tener entre 6 y 15 dígitos.",
+    },
+    {
+      field: "departamento",
+      test: (v) => v.trim() !== "",
+      message: "El departamento es obligatorio.",
+    },
+    {
+      field: "direccion",
+      test: (v) => v.trim() !== "",
+      message: "La dirección es obligatoria.",
+    },
+    {
+      field: "distrito",
+      test: (v) => v.trim() !== "",
+      message: "El distrito es obligatorio.",
+    },
+    {
+      field: "id_servicio",
+      test: (v) => v !== "",
+      message: "Debes seleccionar un servicio.",
+    },
+    {
+      field: "tipoReclamo",
+      test: (v) => v !== "",
+      message: "Debes indicar si es un reclamo o una queja.",
+    },
+    {
+      field: "fechaIncidente",
+      test: (v) => v !== "" && new Date(v) <= new Date(),
+      message: "La fecha no es válida.",
+    },
+    {
+      field: "descripcionServicio",
+      test: (v) => v.trim().length >= 20 && v.length <= 1050,
+      message: "La descripción debe tener entre 20 y 1050 caracteres.",
+    },
+    {
+      field: "checkReclamoForm",
+      test: (v) => v === true,
+      message: "Debes confirmar que los datos son veraces.",
+    },
+    {
+      field: "aceptaPoliticaPrivacidad",
+      test: (v) => v === true,
+      message: "Debes aceptar la política de privacidad.",
+    },
+  ];
 
-// validaciones de DNI
-function validateDni(data) {
-  if (!data.dni.trim()) return "El número de documento es obligatorio."
-  if (data.tipoDocumento === "DNI" && !/^\d{8}$/.test(data.dni)) return "El DNI debe tener 8 dígitos y no contener letras."
-  if (data.tipoDocumento === "CE" && !/^[a-zA-Z0-9]{9,12}$/.test(data.dni)) return "El CE debe tener entre 9 y 12 caracteres."
-  if (data.tipoDocumento === "Pasaporte" && !/^[a-zA-Z0-9]{5,20}$/.test(data.dni)) return "El pasaporte debe tener entre 5 y 20 caracteres."
-  return null
-}
+  // validaciones de DNI
+  function validateDni(data) {
+    if (!data.dni.trim()) return "El número de documento es obligatorio.";
+    if (data.tipoDocumento === "DNI" && !/^\d{8}$/.test(data.dni))
+      return "El DNI debe tener 8 dígitos y no contener letras.";
+    if (data.tipoDocumento === "CE" && !/^[a-zA-Z0-9]{9,12}$/.test(data.dni))
+      return "El CE debe tener entre 9 y 12 caracteres.";
+    if (
+      data.tipoDocumento === "Pasaporte" &&
+      !/^[a-zA-Z0-9]{5,20}$/.test(data.dni)
+    )
+      return "El pasaporte debe tener entre 5 y 20 caracteres.";
+    return null;
+  }
 
-function validate(data) {
-  const errors = {}
-  rules.forEach(({ field, test, message }) => {
-    if (!test(data[field])) errors[field] = message
-  })
-  const dniError = validateDni(data)
-  if (dniError) errors.dni = dniError
-  return errors
-}
+  function validate(data) {
+    const errors = {};
+    rules.forEach(({ field, test, message }) => {
+      if (!test(data[field])) errors[field] = message;
+    });
+    const dniError = validateDni(data);
+    if (dniError) errors.dni = dniError;
+    return errors;
+  }
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    const validationErrors = validate(formData)
-    setErrors(validationErrors)
+    const validationErrors = validate(formData);
+    setErrors(validationErrors);
 
     if (Object.keys(validationErrors).length > 0) {
       Swal.fire({
@@ -123,23 +186,23 @@ function validate(data) {
         text: "Hay campos incompletos o incorrectos.",
         icon: "warning",
         confirmButtonText: "OK",
-      })
-      return
+      });
+      return;
     }
 
-    setStatus("loading")
+    setStatus("loading");
 
     try {
       const response = await fetch(`${API_URL}/api/reclamaciones`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
-      })
+      });
 
       if (response.ok) {
-        setStatus("success")
-        setFormData(initialFormData)
-        setErrors({})
+        setStatus("success");
+        setFormData(initialFormData);
+        setErrors({});
 
         Swal.fire({
           title: "¡Solicitud enviada con éxito!",
@@ -147,19 +210,19 @@ function validate(data) {
           confirmButtonColor: "#0c1a27",
         });
       } else {
-        setStatus("error")
-        const data = await response.json().catch(() => null)
-        const backendErrors = data?.errors
+        setStatus("error");
+        const data = await response.json().catch(() => null);
+        const backendErrors = data?.errors;
         const primerError = backendErrors
           ? Object.values(backendErrors)[0][0]
-          : "Ocurrió un error al enviar el mensaje."
+          : "Ocurrió un error al enviar el mensaje.";
 
         if (backendErrors) {
-          const mapped = {}
+          const mapped = {};
           Object.entries(backendErrors).forEach(([key, msgs]) => {
-            mapped[key] = msgs[0]
-          })
-          setErrors((prev) => ({ ...prev, ...mapped }))
+            mapped[key] = msgs[0];
+          });
+          setErrors((prev) => ({ ...prev, ...mapped }));
         }
 
         Swal.fire({
@@ -171,7 +234,7 @@ function validate(data) {
         });
       }
     } catch (error) {
-      setStatus("error")
+      setStatus("error");
       Swal.fire({
         title: "Error",
         text: "Ocurrió un error al enviar el mensaje. Intenta nuevamente.",
@@ -180,7 +243,7 @@ function validate(data) {
         confirmButtonColor: "#0c1a27",
       });
     }
-  }
+  };
 
   return (
     <>
@@ -211,7 +274,7 @@ function validate(data) {
         </div>
       </main>
       <section className="p-4 sm:p-8 text-[#b2b2b2] md:border-2 my-8 md:my-16 border-[#b2b2b2] max-w-3xl mx-auto">
-        <h2 className="text-center text-black md:text-left text-lg md:text-xl font-semibold mb-4 text-balance">
+        <h2 className="text-center text-white md:text-left text-lg md:text-xl font-semibold mb-4 text-balance">
           Déjanos tus datos para poder atender tu reclamo
         </h2>
 
@@ -309,7 +372,9 @@ function validate(data) {
 
           {/* Tipo de solicitud */}
           <div className="mb-2">
-            <p className="text-sm mb-2 text-white md:text-[#b2b2b2]">Tipo de solicitud*</p>
+            <p className="text-sm mb-2 text-white md:text-[#b2b2b2]">
+              Tipo de solicitud*
+            </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <RadioCard
                 name="tipoReclamo"
@@ -375,7 +440,9 @@ function validate(data) {
               value={formData.descripcionServicio}
               onChange={handleChange}
               className={`border-2 p-2 w-full bg-white text-black ${
-                errors.descripcionServicio ? "border-red-500" : "border-[#b2b2b2]"
+                errors.descripcionServicio
+                  ? "border-red-500"
+                  : "border-[#b2b2b2]"
               }`}
               rows={5}
               placeholder="Cuéntanos qué ocurrió, con el mayor detalle posible..."
@@ -409,7 +476,10 @@ function validate(data) {
               error={errors.aceptaPoliticaPrivacidad}
             >
               Acepto la{" "}
-              <a className="text-[#007bf9] underline" href="#">
+              <a
+                className="text-[#007bf9] underline"
+                href="/politica-privacidad"
+              >
                 Política de Privacidad y Protección de Datos Personales
               </a>
               *
@@ -417,8 +487,8 @@ function validate(data) {
           </div>
 
           <p className="mt-6 text-sm">
-            Neon Led Publicidad deberá dar respuesta al reclamo o queja en un plazo no mayor a
-            quince (15) días hábiles.
+            Neon Led Publicidad deberá dar respuesta al reclamo o queja en un
+            plazo no mayor a quince (15) días hábiles.
           </p>
 
           <button
@@ -435,12 +505,16 @@ function validate(data) {
 }
 
 function ErrorText({ children }) {
-  return <p className="text-red-500 text-xs mt-1">{children}</p>
+  return <p className="text-red-500 text-xs mt-1">{children}</p>;
 }
 function Input({ label, type, name, value, onChange, maxLength, error }) {
   return (
     <div className="flex flex-col">
-      {label && <label className="text-sm mb-1 text-white md:text-[#b2b2b2]">{label}</label>}
+      {label && (
+        <label className="text-sm mb-1 text-white md:text-[#b2b2b2]">
+          {label}
+        </label>
+      )}
       <input
         className={`border-2 p-2 bg-white text-black ${
           error ? "border-red-500" : "border-[#b2b2b2]"
@@ -453,13 +527,17 @@ function Input({ label, type, name, value, onChange, maxLength, error }) {
       />
       {error && <ErrorText>{error}</ErrorText>}
     </div>
-  )
+  );
 }
 
 function Select({ label, name, value, onChange, options, error }) {
   return (
     <div className="flex flex-col">
-      {label && <label className="text-sm mb-1 text-white md:text-[#b2b2b2]">{label}</label>}
+      {label && (
+        <label className="text-sm mb-1 text-white md:text-[#b2b2b2]">
+          {label}
+        </label>
+      )}
       <select
         name={name}
         value={value}
@@ -479,7 +557,7 @@ function Select({ label, name, value, onChange, options, error }) {
       </select>
       {error && <ErrorText>{error}</ErrorText>}
     </div>
-  )
+  );
 }
 
 function RadioCard({ name, value, checked, onChange, title, description }) {
@@ -502,11 +580,13 @@ function RadioCard({ name, value, checked, onChange, title, description }) {
         />
         <span className="font-semibold">{title}</span>
       </div>
-      <span className={`text-sm ${checked ? "text-[#b2b2b2]" : "text-gray-600"}`}>
+      <span
+        className={`text-sm ${checked ? "text-[#b2b2b2]" : "text-gray-600"}`}
+      >
         {description}
       </span>
     </label>
-  )
+  );
 }
 
 function Checkbox({ name, checked, onChange, error, children }) {
@@ -524,5 +604,5 @@ function Checkbox({ name, checked, onChange, error, children }) {
       </label>
       {error && <ErrorText>{error}</ErrorText>}
     </div>
-  )
+  );
 }
