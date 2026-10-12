@@ -345,60 +345,73 @@ export default function Page() {
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Buscar por título (mín. 3 caracteres)..."
-                value={searchQuery}
-                onChange={handleSearch}
-                className="w-full sm:w-64 pl-10 pr-10 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-              />
-              <Search className="absolute left-3 top-1/3 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              {searchQuery && (
-                <button
-                  onClick={clearSearch}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
+          <div className="flex flex-col lg:flex-row gap-3 w-full max-w-full min-w-0 lg:w-auto">
+            {/* Buscador */}
+            <div className="w-full lg:w-64 lg:flex-shrink-0 min-w-0">
+              <div className="relative w-full min-w-0">
+                <input
+                  type="text"
+                  placeholder="Buscar por título (mín. 3 caracteres)..."
+                  value={searchQuery}
+                  onChange={handleSearch}
+                  className="w-full min-w-0 pl-10 pr-10 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                />
+
+                {/* Lupa centrada verticalmente */}
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={clearSearch}
+                    aria-label="Limpiar búsqueda"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
             </div>
 
-            <div className="flex gap-2 flex-wrap sm:justify-end">
+            {/* Filtros y acciones */}
+            <div className="flex flex-wrap items-center gap-2 w-full lg:flex-1 min-w-0">
               <button
+                type="button"
                 onClick={() => handleFilterChange("all")}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors ${
+                className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg border transition-colors whitespace-nowrap ${
                   activeFilter === "all"
                     ? "bg-sky-50 dark:bg-sky-900 text-sky-600 border-sky-200 dark:border-sky-700"
                     : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700"
                 }`}
               >
-                <FileText className="w-4 h-4" />
+                <FileText className="w-4 h-4 shrink-0" />
                 <span>Todos</span>
               </button>
 
               <button
+                type="button"
                 onClick={() => handleFilterChange("mine")}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors ${
+                className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg border transition-colors whitespace-nowrap ${
                   activeFilter === "mine"
                     ? "bg-sky-50 dark:bg-sky-900 text-sky-600 border-sky-200 dark:border-sky-700"
                     : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700"
                 }`}
               >
-                <User className="w-4 h-4" />
+                <User className="w-4 h-4 shrink-0" />
                 <span>Mis blogs</span>
               </button>
 
               <button
+                type="button"
                 onClick={fetchData}
                 disabled={isRefreshing}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors ${
+                title="Actualizar datos"
+                aria-label="Actualizar datos"
+                className={`flex items-center justify-center p-2 rounded-lg border transition-colors shrink-0 ${
                   isRefreshing
                     ? "opacity-70 cursor-not-allowed bg-slate-50 dark:bg-slate-700 text-slate-400 border-slate-200 dark:border-slate-600"
                     : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700"
                 }`}
-                title="Actualizar datos"
               >
                 {isRefreshing ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -409,28 +422,28 @@ export default function Page() {
 
               <Link
                 href="/edition"
-                className="flex items-center gap-2 px-3 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors"
+                className="flex items-center justify-center gap-2 px-3 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors whitespace-nowrap"
               >
-                <PlusCircleIcon className="w-4 h-4" />
+                <PlusCircleIcon className="w-4 h-4 shrink-0" />
                 <span className="hidden sm:inline">Crear Nuevo</span>
               </Link>
+
               {auth_service.hasRole("administrador") && (
                 <>
-                  {/* Botón pequeño solo icono - Historial */}
                   <Link
                     href="/dashboard/blogs/historial"
                     title="Historial de cambios"
-                    className="p-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-lg 
-                                        hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors flex items-center justify-center"
+                    aria-label="Historial de cambios"
+                    className="p-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors flex items-center justify-center shrink-0"
                   >
                     <History className="w-4 h-4" />
                   </Link>
-                  {/* Botón borradores */}
+
                   <Link
                     href="/dashboard/blogs/borradores"
                     title="Borradores"
-                    className="p-2 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-lg 
-                                        hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors flex items-center justify-center"
+                    aria-label="Borradores"
+                    className="p-2 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors flex items-center justify-center shrink-0"
                   >
                     <FilePen className="w-4 h-4" />
                   </Link>
@@ -585,18 +598,18 @@ export default function Page() {
 
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map(
                   (page) => (
-                  <button
-                    key={`page-desktop-${page}`}
-                    onClick={() => setCurrentPage(page)}
-                    className={`w-9 h-9 rounded-lg border ${
-                      currentPage === page
-                        ? "bg-sky-50 dark:bg-sky-900 text-sky-600 dark:text-sky-300 border-sky-200 dark:border-sky-700"
-                        : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700"
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ),
+                    <button
+                      key={`page-desktop-${page}`}
+                      onClick={() => setCurrentPage(page)}
+                      className={`w-9 h-9 rounded-lg border ${
+                        currentPage === page
+                          ? "bg-sky-50 dark:bg-sky-900 text-sky-600 dark:text-sky-300 border-sky-200 dark:border-sky-700"
+                          : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ),
                 )}
 
                 <button
