@@ -1,42 +1,28 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
-import { useIsMobile } from "@/hooks/useIsMobile";
 import NuestrosProductos from "./productos/components/NuestrosProductos";
 import dynamic from "next/dynamic";
 import Testimonials from "./nosotros/components/Testimonials";
 import Slider from "./components/slider/Slider";
 import WhyUs from "./components/whyUs/WhyUs";
-// const Slider = dynamic(() => import("./components/slider/Slider"), {
-//   ssr: false,
-// });
+
 const Slider2 = dynamic(() => import("./components/slider2/Slider2"), {
   ssr: false,
 });
 
 const FilaProductosModificado = ({ productos, isFirstRow = false }) => {
-  const router = useRouter();
-  const isMobile = useIsMobile(768);
-
-  const handleRedirect = (route) => {
-    router.push(route);
-  };
-
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 justify-items-center w-full max-w-[1300px] mx-auto">
       {productos.map((producto, index) => {
-        const imageSrc =
-          (isMobile || isMobile === undefined) && producto.imgSrcMobile
-            ? producto.imgSrcMobile
-            : producto.imgSrc;
-
         const isFirstProduct = isFirstRow && index === 0;
+        const mobileImageSrc = producto.imgSrcMobile || producto.imgSrc;
 
         return (
-          <div
+          <Link
             key={index}
-            onClick={() => handleRedirect(producto.route)}
+            href={producto.route}
             className="bg-white rounded-3xl p-1 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer w-full max-w-[320px] flex flex-col"
             style={{ contain: "layout style" }}
           >
@@ -49,17 +35,34 @@ const FilaProductosModificado = ({ productos, isFirstRow = false }) => {
                   flexShrink: 0,
                 }}
               >
-                <Image
-                  src={imageSrc}
-                  alt={producto.altText}
-                  title={producto.title}
-                  fill
-                  sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 50vw, 25vw"
-                  className="object-cover object-center transition-transform duration-300 hover:scale-105"
-                  loading={isFirstProduct ? "eager" : "lazy"}
-                  fetchPriority={isFirstProduct ? "high" : "low"}
-                  quality={75}
-                />
+                {/* 1. VERSIÓN MÓVIL: Se muestra solo en pantallas chicas (CSS puro, sin JS) */}
+                <div className="block md:hidden relative w-full h-full">
+                  <Image
+                    src={mobileImageSrc}
+                    alt={producto.altText}
+                    title={producto.title}
+                    fill
+                    sizes="100vw"
+                    className="object-cover object-center transition-transform duration-300 hover:scale-105"
+                    priority={isFirstProduct}
+                    loading={isFirstProduct ? "eager" : "lazy"}
+                    quality={75}
+                  />
+                </div>
+
+                {/* 2. VERSIÓN ESCRITORIO: Se muestra solo en tablets y PC */}
+                <div className="hidden md:block relative w-full h-full">
+                  <Image
+                    src={producto.imgSrc}
+                    alt={producto.altText}
+                    title={producto.title}
+                    fill
+                    sizes="(max-width: 1024px) 50vw, 25vw"
+                    className="object-cover object-center transition-transform duration-300 hover:scale-105"
+                    loading="lazy"
+                    quality={75}
+                  />
+                </div>
               </div>
 
               <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-4 flex justify-center items-center h-[70px]">
@@ -68,7 +71,7 @@ const FilaProductosModificado = ({ productos, isFirstRow = false }) => {
                 </h3>
               </div>
             </div>
-          </div>
+          </Link>
         );
       })}
     </div>
@@ -80,40 +83,31 @@ export default function Home() {
     {
       imgSrc: "/productosPrincipal/Letrero-Crocs-Acrilico.webp",
       imgSrcMobile: "/productosPrincipal/Letrero-Crocs-Acrilico-Mobile2.webp",
-      altText:
-        "Letras acrílicas verdes y negras con bordes blancas de la marca Crocs",
+      altText: "Letras acrílicas verdes y negras con bordes blancas de la marca Crocs",
       title: "Letrero de Crocs",
       description: "LETRAS DE ACRÍLICO",
       route: "/productos/letras-acrilico",
     },
     {
-      imgSrc:
-        "/productosPrincipal/Letras-acrilicas-Lux-Nails-Neon-Led-Publicidad.webp",
-      imgSrcMobile:
-        "/productosPrincipal/Letras-acrilicas-Lux-Nails-Neon-Led-Publicidad.webp",
-      altText:
-        "Letras corporeas doradas con iluminación led elegante sobre un fondo oscuro",
+      imgSrc: "/productosPrincipal/Letras-acrilicas-Lux-Nails-Neon-Led-Publicidad.webp",
+      imgSrcMobile: "/productosPrincipal/Letras-acrilicas-Lux-Nails-Neon-Led-Publicidad.webp",
+      altText: "Letras corporeas doradas con iluminación led elegante sobre un fondo oscuro",
       title: "Letras corporeas doradas con iluminación para estudios estéticos",
       description: "LETRAS DE ALUMINIO DORADAS 3D",
       route: "/productos/letras-doradas",
     },
     {
       imgSrc: "/productosPrincipal/Letras-Acrilicas-Farmacia.webp",
-      imgSrcMobile:
-        "/productosPrincipal/Letras-Acrilicas-Farmacia-Mobile2.webp",
-      altText:
-        "Letrero color verde con letras acrílicas blancas con el nombre de FARMACIA en mayúsculas y un símbolo de cruz verde luminosa.",
+      imgSrcMobile: "/productosPrincipal/Letras-Acrilicas-Farmacia-Mobile2.webp",
+      altText: "Letrero color verde con letras acrílicas blancas con el nombre de FARMACIA en mayúsculas y un símbolo de cruz verde luminosa.",
       title: "Letras acrílicas color blanco para variedad de tiendas y marcas",
       description: "LETREROS LUMINOSOS",
       route: "/productos/letreros-luminosos",
     },
     {
-      imgSrc:
-        "/productosPrincipal/Letrero-Works-licoreria-led-neo-led-publicidad.webp",
-      imgSrcMobile:
-        "/productosPrincipal/Letrero-Works-licoreria-led-neo-led-publicidad.webp",
-      altText:
-        "Letrero led verde con la palabra woks y cerveza artesanal en letras finas, diseñado para negocio de bebidas",
+      imgSrc: "/productosPrincipal/Letrero-Works-licoreria-led-neo-led-publicidad.webp",
+      imgSrcMobile: "/productosPrincipal/Letrero-Works-licoreria-led-neo-led-publicidad.webp",
+      altText: "Letrero led verde con la palabra woks y cerveza artesanal en letras finas, diseñado para negocio de bebidas",
       title: "Letrero led en diversas tipografías para licorerías",
       description: "LETRAS DE NEÓN",
       route: "/productos/letras-neon",
@@ -125,8 +119,7 @@ export default function Home() {
       imgSrc: "/home/imagen_subway_HD_final_2560x1532.webp",
       imgSrcMobile: "/home/imagen_subway_mobile.webp",
       imgSrcIcon: "/home/imagen_subway_icon.webp",
-      altText:
-        "Letras grandes corpóreas doradas con iluminación y fondo blanco",
+      altText: "Letras grandes corpóreas doradas con iluminación y fondo blanco",
       title: "Letras corporeas doradas con iluminación",
     },
     {
@@ -140,8 +133,7 @@ export default function Home() {
       imgSrc: "/home/imagen_botella.webp",
       imgSrcMobile: "/home/imagen_botella_mobile.webp",
       imgSrcIcon: "/home/imagen_botella_icon.webp",
-      altText:
-        "Letrero led amarillo con la palabra tattoo y máquina de tatuar led roja en fachada de estudio de tatuaje",
+      altText: "Letrero led amarillo con la palabra tattoo y máquina de tatuar led roja en fachada de estudio de tatuaje",
       title: "Letrero led tattoo para estudio de tatuaje",
     },
     {
@@ -207,12 +199,12 @@ export default function Home() {
       </section>
 
       <section className="flex justify-center items-center mb-11 md:mb-22 px-4">
-        <a
+        <Link
           href="/contacto"
           className="bg-gradient-to-r from-blue-500 to-blue-700 text-white font-bold text-xl sm:text-3xl md:text-4xl py-4 sm:py-8 md:py-10 px-8 sm:px-16 md:px-20 rounded-full shadow-lg hover:scale-105 transition-transform text-center w-full sm:w-auto inline-block max-w-full"
         >
           ¡CONTÁCTANOS!
-        </a>
+        </Link>
       </section>
 
       <Slider2 slides={clientLogos} />
