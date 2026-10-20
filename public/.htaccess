@@ -1,20 +1,62 @@
+DirectoryIndex index.html
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
 
-  # Blog detail pages are rendered client-side from a static shell page.
-  # Any slug that doesn't map to a real file/folder falls back to the
-  # matching plantilla's shell, which reads the real slug from the URL
-  # and fetches the blog content from the API at runtime.
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule ^blog/plantilla1/(?!_shell/?$).*$ /blog/plantilla1/_shell/index.html [L]
+# 1. Redirecciones 301 de URLs viejas del Blog a Productos (migración SEO)
 
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule ^blog/plantilla2/(?!_shell/?$).*$ /blog/plantilla2/_shell/index.html [L]
+RewriteRule ^blog/letras-acrilicas-3d-moda/?$ /productos/letras-acrilico/ [R=301,L]
+RewriteRule ^blog/cafeterias-con-estilo/?$ /productos/menu-board/ [R=301,L]
+RewriteRule ^blog/techos-led-para-gimnasios/?$ /productos/techos-led/ [R=301,L]
+RewriteRule ^blog/neon-led-para-bares-modernos/?$ /productos/neon-led/ [R=301,L]
+RewriteRule ^blog/pantallas-led-para-locales/?$ /productos/pantalla-led/ [R=301,L]
+RewriteRule ^blog/led-pixel-para-discotecas/?$ /productos/pixel-led/ [R=301,L]
 
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule ^blog/plantilla3/(?!_shell/?$).*$ /blog/plantilla3/_shell/index.html [L]
+# 2. Servir archivos físicos directamente si existen
+
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+# 3. Resolver peticiones RSC / Next.js prefetch (**PAGE**.txt)
+
+RewriteCond %{REQUEST_URI} ^/(._)/(\_\_next\.._)\.**PAGE**\.txt$ [NC]
+RewriteRule ^ /%1/%2/**PAGE**.txt [L]
+
+RewriteCond %{REQUEST_URI} ^/(**next\..\*)\.**PAGE**\.txt$ [NC]
+RewriteRule ^ /%1/**PAGE\_\_.txt [L]
+
+RewriteCond %{QUERY_STRING} \_rsc= [NC]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ - [R=204,L]
+
+# 4. Fallback del blog dinámico con shell
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^blog/plantilla1/(?!\_shell/?$).*$ /blog/plantilla1/\_shell/index.html [L]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^blog/plantilla2/(?!\_shell/?$).*$ /blog/plantilla2/\_shell/index.html [L]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^blog/plantilla3/(?!\_shell/?$).*$ /blog/plantilla3/\_shell/index.html [L]
+
+# 5. Excluir extensiones estáticas y carpetas internas del trailing slash
+
+RewriteCond %{REQUEST_URI} ^/\_next/ [OR]
+RewriteCond %{REQUEST_URI} \.(txt|xml|json|js|css|html|png|jpg|jpeg|svg|webp|ico|woff|woff2|avif)$ [NC]
+RewriteRule ^ - [L]
+
+# 6. Forzar trailing slash a rutas limpias (Next.js trailingSlash: true)
+
+RewriteCond %{REQUEST_URI} !(._)/$
+RewriteRule ^(._)$ /$1/ [R=301,L]
+
+# 7. Servir index.html de cada ruta estática
+
+RewriteCond %{DOCUMENT_ROOT}/$1/index.html -f
+  RewriteRule ^(.*)/$ $1/index.html [L]
 </IfModule>
