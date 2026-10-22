@@ -551,7 +551,7 @@ export default function Page() {
             {/* Tabla para desktop (hidden en móvil, block en desktop) */}
             <div className="hidden md:block overflow-x-auto rounded-lg border border-gray-100">
               <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-[#0d6fdc] dark:bg-gray-800">
+                <thead className="bg-[#0d6fdc] dark:bg-[#2563eb]">
                   <tr>
                     <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                       ID

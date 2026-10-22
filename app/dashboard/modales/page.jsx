@@ -568,7 +568,7 @@ export default function Page() {
             {/* Vista de Tabla para desktop (visible en pantallas ≥ 768px) */}
             <div className="hidden md:block overflow-x-auto rounded-lg border border-gray-100 dark:border-gray-700">
               <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead className="bg-blue-600 dark:bg-gray-800">
+                <thead className="bg-[#0d6fdc] dark:bg-[#2563eb]">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                       ID
