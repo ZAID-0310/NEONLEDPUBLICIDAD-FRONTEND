@@ -222,7 +222,7 @@ export default function RootLayout({ children }) {
             </div>
 
             {/* Navigation */}
-            <nav className="flex-1 overflow-y-auto py-4 px-3">
+            <nav className="sidebar-scroll flex-1 overflow-y-auto py-4 px-3">
               <ul className="space-y-1 whitespace-nowrap">
                 {dashboardLinks.map((link) => {
                   if (!shouldShowLink(link)) return null;
@@ -379,7 +379,7 @@ export default function RootLayout({ children }) {
             </header>
 
             {/* Page content */}
-            <main className="flex-1 overflow-y-auto overflow-x-hidden bg-gray-50 dark:bg-gray-900 p-0">
+            <main className="main-scroll flex-1 overflow-y-auto overflow-x-hidden bg-gray-50 dark:bg-gray-900 p-0">
               {children}
             </main>
           </div>
