@@ -18,16 +18,18 @@ RewriteRule ^blog/led-pixel-para-discotecas/?$ /productos/pixel-led/ [R=301,L]
 RewriteCond %{REQUEST_FILENAME} -f
 RewriteRule ^ - [L]
 
-# 3. Resolver peticiones RSC / Next.js prefetch (**PAGE**.txt)
+# 3. Resolver peticiones RSC / Next.js prefetch (__PAGE__.txt)
+RewriteCond %{REQUEST_URI} ^/(.*)/(__next\..*)\.__PAGE__\.txt$ [NC]
+RewriteRule ^ /%1/%2/__PAGE__.txt [L]
 
-RewriteCond %{REQUEST_URI} ^/(._)/(\_\_next\.._)\.**PAGE**\.txt$ [NC]
-RewriteRule ^ /%1/%2/**PAGE**.txt [L]
+RewriteCond %{REQUEST_URI} ^/(__next\..*)\.__PAGE__\.txt$ [NC]
+RewriteRule ^ /%1/__PAGE__.txt [L]
 
-RewriteCond %{REQUEST_URI} ^/(**next\..\*)\.**PAGE**\.txt$ [NC]
-RewriteRule ^ /%1/**PAGE\_\_.txt [L]
-
-RewriteCond %{QUERY_STRING} \_rsc= [NC]
+# Solo devolver 204 si NO es archivo (!-f) Y TAMPOCO es carpeta (!-d) ni tiene index.html
+RewriteCond %{QUERY_STRING} _rsc= [NC]
 RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI}/index.html !-f
 RewriteRule ^ - [R=204,L]
 
 # 4. Fallback del blog dinámico con shell

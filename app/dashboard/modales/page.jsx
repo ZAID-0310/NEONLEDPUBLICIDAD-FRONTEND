@@ -651,16 +651,13 @@ export default function Page() {
                               <Eye size={18} />
                             </button>
 
-                            <button
+                            <Link
+                              href={`/dashboard/modales/mails/?id_modal=${modal.id_modalservicio}`}
                               title="Emails y WhatsApp"
-                              className="p-1.5 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-100 transition-colors dark:bg-amber-900/20 dark:text-amber-400"
+                              className="inline-flex p-1.5 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-100 transition-colors dark:bg-amber-900/20 dark:text-amber-400"
                             >
-                              <Link
-                                href={`./mails?id_modal=${modal.id_modalservicio}`}
-                              >
-                                <Contact size={17} />
-                              </Link>
-                            </button>
+                              <Contact size={17} />
+                            </Link>
 
                             <button
                               onClick={() =>
