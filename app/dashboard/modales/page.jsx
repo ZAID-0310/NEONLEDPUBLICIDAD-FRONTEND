@@ -731,7 +731,9 @@ export default function Page() {
                 totalPages={totalPages}
                 itemsPerPage={ITEMS_PER_PAGE}
                 entityName="modales"
-                totalItems={searchTerm.trim() !== "" ? filteredData.length : totalRecords}
+                totalItems={
+                  searchTerm.trim() !== "" ? filteredData.length : totalRecords
+                }
               />
             </div>
 
@@ -743,7 +745,11 @@ export default function Page() {
                   totalPages={totalPages}
                   onPageChange={(page) => router.push(`?page=${page}`)}
                   showingCount={filteredData.length}
-                  totalCount={searchTerm.trim() !== "" ? filteredData.length : totalRecords}
+                  totalCount={
+                    searchTerm.trim() !== ""
+                      ? filteredData.length
+                      : totalRecords
+                  }
                   entityName="modales"
                 />
               </div>
