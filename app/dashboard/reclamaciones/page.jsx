@@ -529,7 +529,7 @@ export default function Page() {
               <div className="block w-full overflow-x-auto">
                 <div className="inline-block min-w-full align-middle">
                   <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-blue-600 dark:bg-gray-800">
+                    <thead className="bg-[#0d6fdc] dark:bg-[#2563eb]">
                       <tr>
                         <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                           ID
