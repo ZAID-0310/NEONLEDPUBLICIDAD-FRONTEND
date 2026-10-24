@@ -130,8 +130,9 @@ export default function Banner() {
         </p>
 
         <button
-          className={`${styles.boton} mt-8`}
-          onClick={() => router.push("/contacto")}
+         className={`${styles.boton}`}
+    style={{ marginTop: "60px" }}
+    onClick={() => router.push("/contacto")}
         >
           PIDE YA
         </button>

@@ -48,7 +48,7 @@ export default function RootLayout({ children }) {
     empleadoData?.nombre || userData?.name || "Usuario",
   );
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState(true);
 
