@@ -24,7 +24,7 @@
 //   })
 
 //   const [status, setStatus] = useState(null)
-  
+
 //   const textRegex = /^[a-zA-Z\s]*$/
 //   const numberRegex = /^[+-]?\d*\.?\d*$/
 
@@ -33,7 +33,7 @@
 //   const handleChange = (e) => {
 //     const { name, value } = e.target
 //     let newValue = value
-    
+
 //     if (textTypeInputs.includes(String(name)) && textRegex.test(value)) {
 //       newValue = value
 //     } else if (String(name) === "telefono" && numberRegex.test(value)) {
@@ -87,7 +87,7 @@
 //     }
 //   }
 
-  
+
 //   const SocialMediaSection = () => {
 //     const socialMediaLinks = [
 //       { href: "https://www.facebook.com/profile.php?id=61578497411241", src: "/contacto/Facebook.png", alt: "Enlace a Facebook" },
@@ -133,9 +133,9 @@
 
 //   return (
 //     <div className={`min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-black text-white ${inter.className}`}>
-      
+
 //       <section className="relative min-h-screen overflow-hidden">
-       
+
 //         <div 
 //           className="absolute top-0 left-0 w-full h-1/2 bg-cover bg-center bg-no-repeat"
 //           style={{
@@ -143,7 +143,7 @@
 //           }}
 //         ></div>
 
-      
+
 //         <div 
 //           className="absolute bottom-0 left-0 w-full h-1/2 bg-cover bg-center bg-no-repeat mb-16"
 //           style={{
@@ -151,16 +151,16 @@
 //           }}
 //         ></div>
 
-        
+
 //         <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-black/80 via-black/70 to-black/85">
-          
+
 //           <div className="absolute inset-x-0 top-1/2 transform -translate-y-1/2 h-32 bg-gradient-to-b from-transparent via-black/30 to-transparent"></div>
 //         </div>
 
 //         <div className="container mx-auto px-4 py-8 md:py-12 relative z-10 -mt-8 md:-mt-16">
 //           <div className="flex flex-col lg:flex-row items-start justify-center gap-8 pt-8">
-            
-        
+
+
 //             <div className="w-full lg:w-1/3 space-y-6 md:space-y-8 text-center mt-12 lg:mt-24">
 //               <div>
 //                 <a href="https://maps.app.goo.gl/jWD3Y4GgzaNj1WtY7" target="_blank">
@@ -181,7 +181,7 @@
 //               </div>
 //             </div>
 
-           
+
 //             <div className="w-full lg:w-1/3">
 //               {/* <h2 className="text-center text-lg font-medium text-white">Conoce nuestros medios de</h2> */}
 //               <div className="flex items-center justify-between max-md:justify-between max-lg:justify-evenly px-[20px] overflow-hidden">
@@ -196,11 +196,11 @@
 //                   className="mb-[15px]"
 //                 />
 //               </div>
-              
-              
+
+
 //               <div className="bg-gradient-to-br from-blue-800/30 to-blue-900/40 backdrop-blur-md rounded-2xl p-4 sm:p-6 shadow-2xl border border-blue-400/20">
 //                 <h3 className="text-xl sm:text-2xl font-[900] text-white text-center mb-4 sm:mb-6">SOLICITA INFORMACIÓN</h3>
-                
+
 //                 <form onSubmit={handleSubmit} className="space-y-4">
 //                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 //                     <input type="text" placeholder="Nombre*" name="nombre" value={formData.nombre} onChange={handleChange} required className="w-full p-3 bg-transparent border border-blue-400 rounded-md text-white placeholder:text-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400"/>
@@ -235,7 +235,7 @@
 //         </div>
 //       </section>
 
-     
+
 //       <SocialMediaSection />
 //     </div>
 //   )
@@ -443,10 +443,10 @@ const Contacto = () => {
 
         <div className="container mx-auto px-4 py-8 md:py-12 relative z-10 -mt-8 md:-mt-16">
           <div className="flex flex-col lg:flex-row items-start justify-center gap-8 pt-8">
-            
+
             {/* Información de contacto */}
             <section className="w-full lg:w-1/3 space-y-6 md:space-y-8 text-center mt-12 lg:mt-24">
-              
+
               <article>
                 <a
                   href="https://maps.app.goo.gl/jWD3Y4GgzaNj1WtY7"
@@ -509,7 +509,7 @@ const Contacto = () => {
             {/* Formulario */}
             <section className="w-full lg:w-1/3">
               <div className="flex items-center justify-between max-md:justify-between max-lg:justify-evenly px-[20px] overflow-hidden">
-                
+
                 <h1
                   id="titulo-contacto"
                   className="text-justify text-xl sm:text-2xl font-[900] text-white mb-4 sm:mb-6 w-[60%] mt-[40px]"
@@ -528,13 +528,13 @@ const Contacto = () => {
               </div>
 
               <div className="bg-gradient-to-br from-blue-800/30 to-blue-900/40 backdrop-blur-md rounded-2xl p-4 sm:p-6 shadow-2xl border border-blue-400/20">
-                
+
                 <h2 className="text-xl sm:text-2xl font-[900] text-white text-center mb-4 sm:mb-6">
                   SOLICITA INFORMACIÓN
                 </h2>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                     <div>

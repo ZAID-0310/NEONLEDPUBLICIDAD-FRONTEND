@@ -484,7 +484,7 @@ export default function Page() {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="bg-slate-50 dark:bg-slate-700 border-b border-slate-100 dark:border-slate-600 text-center">
+                  <tr className="bg-[#0d6fdc] dark:bg-[#2563eb] border-b border-slate-100 dark:border-slate-600 text-center">
                     <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wider">
                       ID
                     </th>
