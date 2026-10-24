@@ -481,94 +481,129 @@ export default function Page() {
       ) : (
         <>
           <div className="hidden lg:block bg-white dark:bg-slate-800 rounded-xl shadow-sm mb-6">
-            <div className="overflow-x-auto">
+            {/* Vista de Tabla para desktop */}
+            <div className="hidden md:block overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
               <table className="w-full">
-                <thead>
-                  <tr className="bg-[#0d6fdc] dark:bg-[#2563eb] border-b border-slate-100 dark:border-slate-600 text-center">
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wider">
+                <thead className="bg-blue-600 text-white">
+                  <tr>
+                    <th className="px-6 py-4 text-left font-medium text-sm">
                       ID
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left font-medium text-sm">
                       Título
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left font-medium text-sm">
                       Descripción
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left font-medium text-sm">
                       Imagen
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left font-medium text-sm">
                       Autor
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-center font-medium text-sm">
                       Acciones
                     </th>
                   </tr>
                 </thead>
-                <tbody>
-                  {displayedBlogs.map((blog, index) => (
-                    <tr
-                      key={`blog-${blog.id_card}`}
-                      className={`hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors ${
-                        index !== displayedBlogs.length - 1
-                          ? "border-b border-slate-100 dark:border-slate-700"
-                          : ""
-                      }`}
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-700 dark:text-slate-200">
-                        {blog.id_card}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-slate-700 dark:text-slate-200 max-w-[200px] truncate">
-                        {blog.titulo}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-slate-700 dark:text-slate-200 max-w-[300px] truncate">
-                        {blog.descripcion}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700 dark:text-slate-200">
-                        <div className="w-12 h-12 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-700">
-                          <img
-                            src={blog.public_image || "/placeholder.svg"}
-                            alt={blog.titulo}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700 dark:text-slate-200">
-                        {blog.empleado.nombre || "Desconocido"}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex justify-end gap-2">
-                          <Link
-                            href={`/blog/plantilla${blog.id_plantilla}/${blog.blog.link}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-2 bg-sky-50 dark:bg-sky-900 text-sky-600 rounded-lg hover:bg-sky-100 dark:hover:bg-sky-800 transition-colors"
-                            title="Ver blog"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Link>
-                          <Link
-                            //href={`/edition/modify/plantillas/plantilla${blog.id_plantilla}/?id_blog=${blog.id_blog}`}
-                            href={`/edition?mode=edit&id=${blog.id_blog}`}
-                            className="p-2 bg-amber-50 dark:bg-amber-900 text-amber-600 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-800 transition-colors"
-                            title="Editar blog"
-                          >
-                            <Pencil className="w-4 h-4" />
-                          </Link>
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                  {displayedBlogs.length > 0 ? (
+                    displayedBlogs.map((blog, index) => {
+                      const autorNombre =
+                        blog.empleado?.nombre || "Desconocido";
+                      const autorApellido = blog.empleado?.apellido || "";
+                      const iniciales =
+                        (autorNombre.charAt(0) || "") +
+                        (autorApellido.charAt(0) || "");
 
-                          {auth_service.hasRole("administrador") && (
-                            <button
-                              onClick={() => confirmDelete(blog.id_blog)}
-                              className="p-2 bg-rose-50 dark:bg-rose-900 text-rose-600 rounded-lg hover:bg-rose-100 dark:hover:bg-rose-800 transition-colors"
-                              title="Eliminar blog"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          )}
+                      return (
+                        <tr
+                          key={`blog-${blog.id_card}`}
+                          className={
+                            index % 2 === 0
+                              ? "bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                              : "bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                          }
+                        >
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                            {blog.id_card}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 max-w-[200px] truncate">
+                            {blog.titulo}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 max-w-[300px] truncate">
+                            {blog.descripcion}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm">
+                            <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 shrink-0">
+                              <img
+                                src={blog.public_image || "/placeholder.svg"}
+                                alt={blog.titulo}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center shrink-0">
+                                <span className="text-white text-xs font-medium">
+                                  {iniciales || "A"}
+                                </span>
+                              </div>
+                              <div className="font-medium text-gray-900 dark:text-white truncate">
+                                {autorNombre} {autorApellido}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                            <div className="flex justify-center gap-1">
+                              <Link
+                                href={`/blog/plantilla${blog.id_plantilla}/${blog.blog?.link || ""}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-2 text-sky-600 hover:bg-sky-50 dark:hover:bg-sky-900/20 rounded-full transition-colors flex items-center justify-center"
+                                title="Ver blog"
+                              >
+                                <Eye size={16} />
+                              </Link>
+
+                              <Link
+                                href={`/edition?mode=edit&id=${blog.id_blog}`}
+                                className="p-2 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-full transition-colors flex items-center justify-center"
+                                title="Editar blog"
+                              >
+                                <Pencil size={16} />
+                              </Link>
+
+                              {auth_service.hasRole("administrador") && (
+                                <button
+                                  onClick={() => confirmDelete(blog.id_blog)}
+                                  className="p-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-full transition-colors flex items-center justify-center"
+                                  title="Eliminar blog"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan="6"
+                        className="px-6 py-16 text-center bg-white dark:bg-gray-900"
+                      >
+                        <div className="flex flex-col items-center">
+                          <Filter className="h-12 w-12 text-gray-300 dark:text-gray-600 mb-3" />
+                          <p className="text-gray-500 dark:text-gray-400 font-medium mb-1">
+                            No hay blogs disponibles
+                          </p>
                         </div>
                       </td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
             </div>

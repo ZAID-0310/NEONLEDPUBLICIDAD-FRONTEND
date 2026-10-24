@@ -85,19 +85,18 @@ export default function Page() {
   }
 
   function formatearFecha(fecha) {
-  if (!fecha) return "-";
-  const fechaTexto = String(fecha).replace("T", " ");
-  const [parteFecha, parteHora] = fechaTexto.split(" ");
+    if (!fecha) return "-";
+    const fechaTexto = String(fecha).replace("T", " ");
+    const [parteFecha, parteHora] = fechaTexto.split(" ");
 
-  if (!parteFecha) return "-";
-  const [anio, mes, dia] = parteFecha.split("-");
+    if (!parteFecha) return "-";
+    const [anio, mes, dia] = parteFecha.split("-");
 
-  if (!anio || !mes || !dia) return fecha;
-  const hora = parteHora ? parteHora.substring(0, 5) : "";
+    if (!anio || !mes || !dia) return fecha;
+    const hora = parteHora ? parteHora.substring(0, 5) : "";
 
-  return `${dia}/${mes}/${anio}${hora ? ` ${hora}` : ""}`;
-}
-
+    return `${dia}/${mes}/${anio}${hora ? ` ${hora}` : ""}`;
+  }
 
   async function deleteContact(id) {
     try {
@@ -289,16 +288,17 @@ export default function Page() {
     if (searchTerm.trim() === "") {
       setFilteredData(data);
     } else {
-      const termino = searchTerm.toLowerCase();  
+      const termino = searchTerm.toLowerCase();
 
-      const filtered = data.filter((contacto) =>
-        `${contacto.nombre || ""} ${contacto.apellido || ""}`
-          .toLowerCase()
-          .includes(termino) ||
-        String(contacto.detalle_reclamacion || "")
-          .toLowerCase()
-          .includes(termino) ||
-        String(contacto.id_contactanos || "").includes(termino)
+      const filtered = data.filter(
+        (contacto) =>
+          `${contacto.nombre || ""} ${contacto.apellido || ""}`
+            .toLowerCase()
+            .includes(termino) ||
+          String(contacto.detalle_reclamacion || "")
+            .toLowerCase()
+            .includes(termino) ||
+          String(contacto.id_contactanos || "").includes(termino),
       );
       setFilteredData(filtered);
     }
@@ -327,7 +327,7 @@ export default function Page() {
       contacto.id_contactanos,
       contacto.fecha,
       `${contacto.nombre || ""} ${contacto.apellido || ""}`.trim(),
-      contacto.detalle_reclamacion  || "-",
+      contacto.detalle_reclamacion || "-",
       contacto.mensaje || "-",
       contacto.estado ? "Atendido" : "Pendiente",
     ]);
@@ -374,8 +374,8 @@ export default function Page() {
         <div className="flex items-center gap-2">
           <User size={14} className="text-gray-400" />
           <span className="text-sm text-gray-600 dark:text-gray-400">
-            <span className="font-medium">Cliente:</span>{" "}
-            {contacto.nombre} {contacto.apellido}
+            <span className="font-medium">Cliente:</span> {contacto.nombre}{" "}
+            {contacto.apellido}
           </span>
         </div>
 
@@ -424,12 +424,10 @@ export default function Page() {
           onClick={() =>
             confirmarCambiarEstado(
               contacto.id_contactanos,
-              contacto.estado ? 0 : 1
+              contacto.estado ? 0 : 1,
             )
           }
-          title={`Cambiar a ${
-            contacto.estado ? "Pendiente" : "Atendido"
-          }`}
+          title={`Cambiar a ${contacto.estado ? "Pendiente" : "Atendido"}`}
           className={`p-2 rounded-lg transition-colors ${
             contacto.estado
               ? "bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400"
@@ -442,9 +440,7 @@ export default function Page() {
         {/* Eliminar */}
         {auth_service.hasRole("administrador") && (
           <button
-            onClick={() =>
-              confirmarEliminacion(contacto.id_contactanos)
-            }
+            onClick={() => confirmarEliminacion(contacto.id_contactanos)}
             title="Eliminar"
             className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors dark:bg-red-900/20 dark:text-red-400"
           >
@@ -549,133 +545,158 @@ export default function Page() {
             </div>
 
             {/* Tabla para desktop (hidden en móvil, block en desktop) */}
-            <div className="hidden md:block overflow-x-auto rounded-lg border border-gray-100">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-[#0d6fdc] dark:bg-[#2563eb]">
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-blue-600 text-white">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                      ID
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left font-medium">ID</th>
+                    <th className="px-6 py-4 text-left font-medium">
                       Fecha y hora
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                      Cliente
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left font-medium">Cliente</th>
+                    <th className="px-6 py-4 text-left font-medium">
                       Motivo de contacto
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                      Mensaje
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left font-medium">Mensaje</th>
+                    <th className="px-6 py-4 text-center font-medium">
                       Estado
                     </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
+                    <th className="px-6 py-4 text-center font-medium">
                       Acciones
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-900">
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                   {paginatedData.length > 0 ? (
-                    paginatedData.map((contacto) => (
-                      <tr
-                        key={contacto.id_contactanos}
-                        className="hover:bg-gray-50 transition-colors dark:hover:bg-gray-800 dark:text-white"
-                      >
-                        <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                          {contacto.id_contactanos}
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-white">
-                          {formatearFecha(contacto.fecha_hora)}
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-white">
-                          {contacto.nombre} {contacto.apellido}
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm">
-                          {contacto.detalle_reclamacion || "-"}
-                        </td>
-                        <td className="px-4 py-4 text-sm text-gray-700 dark:text-white max-w-xs">
-                          <span
-                            className="block truncate"
-                            title={contacto.mensaje || ""}
-                          >
-                            {contacto.mensaje || "-"}
-                          </span>
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-left">
-                          <span
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              contacto.estado
-                                ? "bg-green-100 text-green-800"
-                                : "bg-yellow-100 text-yellow-800"
-                            }`}
-                          >
-                            {contacto.estado ? "Atendido" : "Pendiente"}
-                          </span>
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-center text-sm font-medium">
-                          <div className="flex justify-center gap-2">
-                            <button
-                              onClick={() =>
-                                visualizar(contacto.id_contactanos)
-                              }
-                              title="Visualizar"
-                              className="p-1.5 bg-amber-50 text-[#0d6fdc] rounded-lg hover:bg-amber-100 transition-colors"
+                    paginatedData.map((contacto, index) => {
+                      const iniciales =
+                        (contacto.nombre?.charAt(0) || "") +
+                        (contacto.apellido?.charAt(0) || "");
+
+                      return (
+                        <tr
+                          key={contacto.id_contactanos}
+                          className={
+                            index % 2 === 0
+                              ? "bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800"
+                              : "bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600"
+                          }
+                        >
+                          <td className="px-6 py-4 text-gray-900 dark:text-white font-medium">
+                            {contacto.id_contactanos}
+                          </td>
+                          <td className="px-6 py-4 text-gray-700 dark:text-gray-300">
+                            {formatearFecha(contacto.fecha_hora)}
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center shrink-0">
+                                <span className="text-white text-xs font-medium">
+                                  {iniciales}
+                                </span>
+                              </div>
+                              <div className="truncate">
+                                <div className="text-gray-900 dark:text-white font-medium truncate">
+                                  {contacto.nombre} {contacto.apellido}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-gray-700 dark:text-gray-300">
+                            {contacto.detalle_reclamacion || "-"}
+                          </td>
+                          <td className="px-6 py-4 text-gray-700 dark:text-gray-300 max-w-xs">
+                            <span
+                              className="block truncate"
+                              title={contacto.mensaje || ""}
                             >
-                              <Eye size={18} />
-                            </button>
-                            <button
-                              onClick={() =>
-                                confirmarCambiarEstado(
-                                  contacto.id_contactanos,
-                                  contacto.estado ? 0 : 1,
-                                )
-                              }
-                              title={`Cambiar a ${contacto.estado ? "Pendiente" : "Atendido"}`}
-                              className={`p-1.5 rounded-lg transition-colors ${
+                              {contacto.mensaje || "-"}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            <span
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                                 contacto.estado
-                                  ? "bg-blue-50 text-blue-600 hover:bg-blue-100"
-                                  : "bg-green-50 text-green-600 hover:bg-green-100"
+                                  ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                                  : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
                               }`}
                             >
-                              <ToggleLeft size={18} />
-                            </button>
-                            {auth_service.hasRole("administrador") && (
+                              {contacto.estado ? "Atendido" : "Pendiente"}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex justify-center gap-1">
+                              {/* Botón Visualizar */}
                               <button
                                 onClick={() =>
-                                  confirmarEliminacion(contacto.id_contactanos)
+                                  visualizar(contacto.id_contactanos)
                                 }
-                                title="Eliminar"
-                                className="p-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors"
+                                title="Visualizar"
+                                className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full transition-colors"
                               >
-                                <Trash2 size={18} />
+                                <Eye size={16} />
                               </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    ))
+
+                              {/* Botón Cambiar Estado */}
+                              <button
+                                onClick={() =>
+                                  confirmarCambiarEstado(
+                                    contacto.id_contactanos,
+                                    contacto.estado ? 0 : 1,
+                                  )
+                                }
+                                title={`Cambiar a ${contacto.estado ? "Pendiente" : "Atendido"}`}
+                                className={`p-2 rounded-full transition-colors ${
+                                  contacto.estado
+                                    ? "text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
+                                    : "text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20"
+                                }`}
+                              >
+                                <ToggleLeft size={16} />
+                              </button>
+
+                              {/* Botón Eliminar */}
+                              {auth_service.hasRole("administrador") && (
+                                <button
+                                  onClick={() =>
+                                    confirmarEliminacion(
+                                      contacto.id_contactanos,
+                                    )
+                                  }
+                                  title="Eliminar"
+                                  className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
                   ) : (
                     <tr>
-                      <td colSpan="7" className="px-6 py-16 text-center">
+                      <td
+                        colSpan="7"
+                        className="px-6 py-16 text-center bg-white dark:bg-gray-900"
+                      >
                         <div className="flex flex-col items-center">
-                          <Filter className="h-12 w-12 text-gray-300 mb-3" />
-                          <p className="text-gray-500 font-medium mb-1">
+                          <Filter className="h-12 w-12 text-gray-300 dark:text-gray-600 mb-3" />
+                          <p className="text-gray-500 dark:text-gray-400 font-medium mb-1">
                             No hay datos disponibles
                           </p>
                           {searchTerm && (
-                            <p className="text-gray-400 text-sm">
-                              No se encontraron resultados para "{searchTerm}"
-                            </p>
-                          )}
-                          {searchTerm && (
-                            <button
-                              onClick={() => setSearchTerm("")}
-                              className="mt-3 text-[#0d6fdc] text-sm font-medium hover:underline"
-                            >
-                              Limpiar búsqueda
-                            </button>
+                            <>
+                              <p className="text-gray-400 dark:text-gray-500 text-sm">
+                                No se encontraron resultados para "{searchTerm}"
+                              </p>
+                              <button
+                                onClick={() => setSearchTerm("")}
+                                className="mt-3 text-blue-600 dark:text-blue-400 text-sm font-medium hover:underline"
+                              >
+                                Limpiar búsqueda
+                              </button>
+                            </>
                           )}
                         </div>
                       </td>
