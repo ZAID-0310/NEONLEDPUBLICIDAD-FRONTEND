@@ -436,7 +436,7 @@ export default function Page() {
         <button
           onClick={() => visualizar(modal.id_modalservicio)}
           title="Visualizar"
-          className="p-2 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-100 transition-colors dark:bg-amber-900/20 dark:text-amber-400"
+          className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors dark:bg-blue-900/20 dark:text-blue-400"
         >
           <Eye size={18} />
         </button>
@@ -564,153 +564,173 @@ export default function Page() {
                 </div>
               )}
             </div>
-
             {/* Vista de Tabla para desktop (visible en pantallas ≥ 768px) */}
-            <div className="hidden md:block overflow-x-auto rounded-lg border border-gray-100 dark:border-gray-700">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead className="bg-[#0d6fdc] dark:bg-[#2563eb]">
+            <div className="hidden md:block overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+              <table className="w-full">
+                <thead className="bg-blue-600 text-white">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left font-medium text-sm">
                       ID
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left font-medium text-sm">
                       Nombres
                     </th>
-
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider"
+                      className="px-6 py-4 text-left font-medium text-sm"
                     >
                       Correo
                     </th>
-
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider"
+                      className="px-6 py-4 text-left font-medium text-sm"
                     >
                       Telefono
                     </th>
-
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider"
+                      className="px-6 py-4 text-left font-medium text-sm"
                     >
                       Producto de Contrato
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                    <th className="px-6 py-4 text-center font-medium text-sm">
                       Estado
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-white uppercase tracking-wider">
+                    <th className="px-6 py-4 text-center font-medium text-sm">
                       Acciones
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900">
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                   {filteredData.length > 0 ? (
-                    filteredData.map((modal) => (
-                      <tr
-                        key={`${modal.id_modalservicio}-Row`}
-                        className="hover:bg-gray-50 transition-colors dark:hover:bg-gray-800 dark:text-white"
-                      >
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                          {modal.id_modalservicio}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-white">
-                          {modal.nombre}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-white">
-                          {modal.correo}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-white">
-                          {modal.telefono}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-white">
-                          {/* {productsById[modal.id_producto] || 'No asignado'} */}
-                          {isLoadingProducts
-                            ? "Cargando..."
-                            : productsById[modal.id_producto] || "No asignado"}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              modal.estado
-                                ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                                : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-                            }`}
-                          >
-                            {modal.estado ? "Activo" : "Inactivo"}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <div className="flex justify-end gap-2">
-                            <button
-                              onClick={() => visualizar(modal.id_modalservicio)}
-                              title="Visualizar"
-                              className="p-1.5 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-100 transition-colors dark:bg-amber-900/20 dark:text-amber-400"
-                            >
-                              <Eye size={18} />
-                            </button>
+                    filteredData.map((modal, index) => {
+                      const iniciales =
+                        (modal.nombre?.charAt(0) || "") +
+                        (modal.apellido?.charAt(0) || "");
 
-                            <Link
-                              href={`/dashboard/modales/mails/?id_modal=${modal.id_modalservicio}`}
-                              title="Emails y WhatsApp"
-                              className="inline-flex p-1.5 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-100 transition-colors dark:bg-amber-900/20 dark:text-amber-400"
-                            >
-                              <Contact size={17} />
-                            </Link>
-
-                            <button
-                              onClick={() =>
-                                confirmarCambiarEstado(
-                                  modal.id_modalservicio,
-                                  `${modal.estado ? 0 : 1}`,
-                                )
-                              }
-                              title={`Cambiar a ${modal.estado ? "Inactivo" : "Activo"}`}
-                              className={`p-1.5 rounded-lg transition-colors ${
+                      return (
+                        <tr
+                          key={`${modal.id_modalservicio}-Row`}
+                          className={
+                            index % 2 === 0
+                              ? "bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                              : "bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                          }
+                        >
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                            {modal.id_modalservicio}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center shrink-0">
+                                <span className="text-white text-xs font-medium">
+                                  {iniciales || "U"}
+                                </span>
+                              </div>
+                              <div className="text-gray-900 dark:text-white font-medium">
+                                {modal.nombre} {modal.apellido || ""}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                            {modal.correo}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                            {modal.telefono}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                            {isLoadingProducts
+                              ? "Cargando..."
+                              : productsById[modal.id_producto] ||
+                                "No asignado"}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <span
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                                 modal.estado
-                                  ? "bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400"
-                                  : "bg-green-50 text-green-600 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400"
+                                  ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                                  : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
                               }`}
                             >
-                              <ToggleLeft size={18} />
-                            </button>
-
-                            {auth_service.hasRole("administrador") && (
+                              {modal.estado ? "Activo" : "Inactivo"}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                            <div className="flex justify-center gap-1">
                               <button
                                 onClick={() =>
-                                  confirmarEliminacion(modal.id_modalservicio)
+                                  visualizar(modal.id_modalservicio)
                                 }
-                                title="Eliminar"
-                                className="p-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors dark:bg-red-900/20 dark:text-red-400"
+                                title="Visualizar"
+                                className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full transition-colors"
                               >
-                                <Trash2 size={18} />
+                                <Eye size={16} />
                               </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    ))
+
+                              <Link
+                                href={`/dashboard/modales/mails/?id_modal=${modal.id_modalservicio}`}
+                                title="Emails y WhatsApp"
+                                className="p-2 text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 rounded-full transition-colors flex items-center justify-center"
+                              >
+                                <Contact size={16} />
+                              </Link>
+
+                              <button
+                                onClick={() =>
+                                  confirmarCambiarEstado(
+                                    modal.id_modalservicio,
+                                    `${modal.estado ? 0 : 1}`,
+                                  )
+                                }
+                                title={`Cambiar a ${modal.estado ? "Inactivo" : "Activo"}`}
+                                className={`p-2 rounded-full transition-colors ${
+                                  modal.estado
+                                    ? "text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
+                                    : "text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20"
+                                }`}
+                              >
+                                <ToggleLeft size={16} />
+                              </button>
+
+                              {auth_service.hasRole("administrador") && (
+                                <button
+                                  onClick={() =>
+                                    confirmarEliminacion(modal.id_modalservicio)
+                                  }
+                                  title="Eliminar"
+                                  className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
                   ) : (
                     <tr>
-                      <td colSpan="7" className="px-6 py-16 text-center">
+                      <td
+                        colSpan="7"
+                        className="px-6 py-16 text-center bg-white dark:bg-gray-900"
+                      >
                         <div className="flex flex-col items-center">
-                          <Filter className="h-12 w-12 text-gray-300 mb-3" />
-                          <p className="text-gray-500 font-medium mb-1">
+                          <Filter className="h-12 w-12 text-gray-300 dark:text-gray-600 mb-3" />
+                          <p className="text-gray-500 dark:text-gray-400 font-medium mb-1">
                             No hay datos disponibles
                           </p>
                           {searchTerm && (
-                            <p className="text-gray-400 text-sm">
-                              No se encontraron resultados para "{searchTerm}"
-                            </p>
-                          )}
-                          {searchTerm && (
-                            <button
-                              onClick={() => setSearchTerm("")}
-                              className="mt-3 text-[#0d6fdc] text-sm font-medium hover:underline"
-                            >
-                              Limpiar búsqueda
-                            </button>
+                            <>
+                              <p className="text-gray-400 dark:text-gray-500 text-sm">
+                                No se encontraron resultados para "{searchTerm}"
+                              </p>
+                              <button
+                                onClick={() => setSearchTerm("")}
+                                className="mt-3 text-blue-600 dark:text-blue-400 text-sm font-medium hover:underline"
+                              >
+                                Limpiar búsqueda
+                              </button>
+                            </>
                           )}
                         </div>
                       </td>

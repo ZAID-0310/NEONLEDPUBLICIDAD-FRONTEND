@@ -29,8 +29,8 @@ export default function PaginationMobile({
               aria-label="Página anterior"
               className={`flex items-center justify-center h-9 w-9 shrink-0 rounded-lg border transition-colors ${
                 page === 1
-                  ? "bg-gray-50 text-gray-300 border-gray-200 cursor-not-allowed"
-                  : "bg-white text-gray-700 border-gray-200 hover:bg-gray-100"
+                  ? "bg-gray-50 text-gray-300 border-gray-200 cursor-not-allowed dark:bg-blue-400 dark:text-gray-300 dark:border-blue-600"
+                  : "bg-white text-gray-700 border-gray-200 hover:bg-gray-100 dark:bg-blue-600 dark:text-gray-300 dark:border-blue-600"
               }`}
             >
               <ChevronLeft className="h-4 w-4" />
@@ -47,8 +47,8 @@ export default function PaginationMobile({
               aria-label="Página siguiente"
               className={`flex items-center justify-center h-9 w-9 shrink-0 rounded-lg border transition-colors ${
                 page === totalPages
-                  ? "bg-gray-50 text-gray-300 border-gray-200 cursor-not-allowed"
-                  : "bg-white text-gray-700 border-gray-200 hover:bg-gray-100"
+                  ? "bg-gray-50 text-gray-300 border-gray-200 cursor-not-allowed dark:bg-blue-400 dark:text-gray-300 dark:border-blue-600"
+                  : "bg-white text-gray-700 border-gray-200 hover:bg-gray-100  dark:bg-blue-600 dark:text-gray-300 dark:border-blue-600"
               }`}
             >
               <ChevronRight className="h-4 w-4" />
