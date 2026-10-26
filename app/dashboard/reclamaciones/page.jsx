@@ -527,139 +527,162 @@ export default function Page() {
               </div>
             ) : (
               <div className="block w-full overflow-x-auto">
-                <div className="inline-block min-w-full align-middle">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-[#0d6fdc] dark:bg-[#2563eb]">
+                {/* Vista de Tabla para desktop (visible en pantallas ≥ 768px) */}
+                <div className="hidden md:block overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+                  <table className="w-full">
+                    <thead className="bg-blue-600 text-white">
                       <tr>
-                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                        <th className="px-6 py-4 text-left font-medium text-sm">
                           ID
                         </th>
-                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                        <th className="px-6 py-4 text-left font-medium text-sm">
                           Nombres
                         </th>
-                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider hidden sm:table-cell">
+                        <th className="px-6 py-4 text-left font-medium text-sm hidden sm:table-cell">
                           Correo
                         </th>
-                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                        <th className="px-6 py-4 text-left font-medium text-sm">
                           Estado
                         </th>
-                        <th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-white uppercase tracking-wider">
+                        <th className="px-6 py-4 text-center font-medium text-sm">
                           Acciones
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-900">
+                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                       {paginatedData.length > 0 ? (
-                        paginatedData.map((reclamacion) => (
-                          <tr
-                            key={reclamacion.id_reclamacion}
-                            className="hover:bg-gray-50 transition-colors dark:hover:bg-gray-800 dark:text-white"
-                          >
-                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                              {reclamacion.id_reclamacion}
-                            </td>
-                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-white">
-                              <div>
-                                <div className="font-medium">
-                                  {reclamacion.nombre} {reclamacion.apellido}
-                                </div>
-                                <div className="text-xs text-gray-500 sm:hidden mt-1">
-                                  {reclamacion.email}
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-white hidden sm:table-cell">
-                              {reclamacion.email}
-                            </td>
-                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
-                              <span
-                                className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                  reclamacion.estadoReclamo === "ATENDIDO"
-                                    ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                                    : "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200"
-                                }`}
-                              >
-                                {reclamacion.estadoReclamo === "ATENDIDO" ? (
-                                  <CheckCircle size={12} />
-                                ) : (
-                                  <AlertCircle size={12} />
-                                )}
-                                {reclamacion.estadoReclamo}
-                              </span>
-                            </td>
-                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                              <div className="flex justify-end gap-2">
-                                <button
-                                  onClick={() =>
-                                    visualizar(reclamacion.id_reclamacion)
-                                  }
-                                  title="Visualizar"
-                                  className="p-1.5 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-100 transition-colors dark:bg-amber-900/20 dark:text-amber-400"
-                                >
-                                  <Eye size={18} />
-                                </button>
+                        paginatedData.map((reclamacion, index) => {
+                          const iniciales =
+                            (reclamacion.nombre?.charAt(0) || "") +
+                            (reclamacion.apellido?.charAt(0) || "");
 
-                                <button
-                                  onClick={() =>
-                                    confirmarCambiarEstado(
-                                      reclamacion.id_reclamacion,
-                                      reclamacion.estadoReclamo === "PENDIENTE"
-                                        ? "ATENDIDO"
-                                        : "PENDIENTE",
-                                    )
-                                  }
-                                  title={`Cambiar a ${
-                                    reclamacion.estadoReclamo === "PENDIENTE"
-                                      ? "ATENDIDO"
-                                      : "PENDIENTE"
-                                  }`}
-                                  className={`p-1.5 rounded-lg transition-colors ${
-                                    reclamacion.estadoReclamo === "PENDIENTE"
-                                      ? "bg-green-50 text-green-600 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400"
-                                      : "bg-amber-50 text-amber-600 hover:bg-amber-100 dark:bg-amber-900/20 dark:text-amber-400"
+                          return (
+                            <tr
+                              key={reclamacion.id_reclamacion}
+                              className={
+                                index % 2 === 0
+                                  ? "bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                                  : "bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                              }
+                            >
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                                {reclamacion.id_reclamacion}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center shrink-0">
+                                    <span className="text-white text-xs font-medium">
+                                      {iniciales || "U"}
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <div className="font-medium text-gray-900 dark:text-white">
+                                      {reclamacion.nombre}{" "}
+                                      {reclamacion.apellido}
+                                    </div>
+                                    <div className="text-xs text-gray-500 sm:hidden mt-0.5">
+                                      {reclamacion.email}
+                                    </div>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300 hidden sm:table-cell">
+                                {reclamacion.email}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-left">
+                                <span
+                                  className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                    reclamacion.estadoReclamo === "ATENDIDO"
+                                      ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                                      : "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
                                   }`}
                                 >
-                                  <CheckCircle size={18} />
-                                </button>
-
-                                {auth_service.hasRole("administrador") && (
+                                  {reclamacion.estadoReclamo === "ATENDIDO" ? (
+                                    <CheckCircle size={12} />
+                                  ) : (
+                                    <AlertCircle size={12} />
+                                  )}
+                                  {reclamacion.estadoReclamo}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                                <div className="flex justify-center gap-1">
                                   <button
                                     onClick={() =>
-                                      confirmarEliminacion(
+                                      visualizar(reclamacion.id_reclamacion)
+                                    }
+                                    title="Visualizar"
+                                    className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full transition-colors"
+                                  >
+                                    <Eye size={16} />
+                                  </button>
+
+                                  <button
+                                    onClick={() =>
+                                      confirmarCambiarEstado(
                                         reclamacion.id_reclamacion,
+                                        reclamacion.estadoReclamo ===
+                                          "PENDIENTE"
+                                          ? "ATENDIDO"
+                                          : "PENDIENTE",
                                       )
                                     }
-                                    title="Eliminar"
-                                    className="p-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors dark:bg-red-900/20 dark:text-red-400"
+                                    title={`Cambiar a ${
+                                      reclamacion.estadoReclamo === "PENDIENTE"
+                                        ? "ATENDIDO"
+                                        : "PENDIENTE"
+                                    }`}
+                                    className={`p-2 rounded-full transition-colors ${
+                                      reclamacion.estadoReclamo === "PENDIENTE"
+                                        ? "text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20"
+                                        : "text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20"
+                                    }`}
                                   >
-                                    <Trash2 size={18} />
+                                    <CheckCircle size={16} />
                                   </button>
-                                )}
-                              </div>
-                            </td>
-                          </tr>
-                        ))
+
+                                  {auth_service.hasRole("administrador") && (
+                                    <button
+                                      onClick={() =>
+                                        confirmarEliminacion(
+                                          reclamacion.id_reclamacion,
+                                        )
+                                      }
+                                      title="Eliminar"
+                                      className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
+                                    >
+                                      <Trash2 size={16} />
+                                    </button>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })
                       ) : (
                         <tr>
-                          <td colSpan="5" className="px-6 py-16 text-center">
+                          <td
+                            colSpan="5"
+                            className="px-6 py-16 text-center bg-white dark:bg-gray-900"
+                          >
                             <div className="flex flex-col items-center">
-                              <Filter className="h-12 w-12 text-gray-300 mb-3" />
-                              <p className="text-gray-500 font-medium mb-1">
+                              <Filter className="h-12 w-12 text-gray-300 dark:text-gray-600 mb-3" />
+                              <p className="text-gray-500 dark:text-gray-400 font-medium mb-1">
                                 No hay reclamaciones disponibles
                               </p>
                               {searchTerm && (
-                                <p className="text-gray-400 text-sm">
-                                  No se encontraron resultados para "
-                                  {searchTerm}"
-                                </p>
-                              )}
-                              {searchTerm && (
-                                <button
-                                  onClick={() => setSearchTerm("")}
-                                  className="mt-3 text-[#8c52ff] text-sm font-medium hover:underline"
-                                >
-                                  Limpiar búsqueda
-                                </button>
+                                <>
+                                  <p className="text-gray-400 dark:text-gray-500 text-sm">
+                                    No se encontraron resultados para "
+                                    {searchTerm}"
+                                  </p>
+                                  <button
+                                    onClick={() => setSearchTerm("")}
+                                    className="mt-3 text-blue-600 dark:text-blue-400 text-sm font-medium hover:underline"
+                                  >
+                                    Limpiar búsqueda
+                                  </button>
+                                </>
                               )}
                             </div>
                           </td>
