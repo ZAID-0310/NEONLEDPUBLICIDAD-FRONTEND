@@ -370,7 +370,7 @@ export default function RootLayout({ children }) {
           </aside>
 
           {/* Main content */}
-          <div className="flex flex-col flex-1 min-w-0 ml-20 transition-all duration-300">
+          <div className={`flex flex-col flex-1 min-w-0 ${isSidebarOpen ? "ml-64" : "ml-20"} transition-all duration-300`}>
             {/* Header */}
             <header className="z-10 h-16 flex items-center justify-between px-6 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
               <h1 className="text-xl font-semibold text-gray-800 dark:text-white">
