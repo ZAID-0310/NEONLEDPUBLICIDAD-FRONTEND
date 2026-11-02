@@ -453,11 +453,8 @@ export default function FormMain({
   useEffect(() => {
     registerActions({
       onSave: handleSave,
-
-      disabled: false, // Lo actualizaremos en el siguiente efecto
-
-      loading: false,
-
+      disabled: loading || isSaving || !isFormValid, //  Misma regla en tiempo real que el botón inferior
+      loading: isSaving,
       label: isCreateMode ? "Crear Blog" : "Actualizar Blog",
     });
 
@@ -469,17 +466,14 @@ export default function FormMain({
         label: "",
       });
     };
-  }, [registerActions, handleSave, isCreateMode]);
-
-  // Efecto 2: Actualizar solo el estado disabled/loading (se ejecuta más frecuentemente)
-
-  useEffect(() => {
-    registerActions({
-      disabled: loading || isSaving || !isFormValid,
-
-      loading: isSaving,
-    });
-  }, [registerActions, loading, isSaving, isFormValid]);
+  }, [
+    registerActions,
+    handleSave,
+    isCreateMode,
+    loading,
+    isSaving,
+    isFormValid, // Se ejecutará en tiempo real cada vez que cambie la validez
+  ]);
 
   const handleCancel = useCallback(() => {
     if (isDirty) {

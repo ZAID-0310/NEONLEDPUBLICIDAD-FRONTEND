@@ -56,8 +56,15 @@ export default function Footer() {
               </a>
             </div>
             <div>
-              <p className="font-semibold mb-2">Celular:</p>
-              <p className="text-sm">+51 994 078 320</p>
+                <p className="font-semibold mb-2">Celular:</p>
+                <a
+                  href="https://wa.me/51994078320"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm hover:text-[#48A8FF] transition-colors duration-300 block"
+                >
+                  +51 994 078 320
+                </a>
             </div>
           </div>
 

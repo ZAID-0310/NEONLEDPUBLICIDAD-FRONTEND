@@ -54,8 +54,14 @@ function PageContent() {
       }
       try {
         setIsLoading(true);
+        const token = getCookie("token");
         const response = await axios.get(
-          `${url}/api/modals_emails_wats/${id_modal}`,
+          `${url}/api/modales/modals_emails_wats/${id_modal}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
         );
 
         if (response.status === 200) {

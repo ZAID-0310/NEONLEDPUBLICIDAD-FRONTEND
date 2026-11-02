@@ -14,7 +14,7 @@ import {
   BookTemplate,
   Pencil,
   Menu, //AGREGAR PARA EL MENU HAMBURGUESA
-  X,//PARA CERRAR EL MENU HAMBURGUESA
+  X, //PARA CERRAR EL MENU HAMBURGUESA
 } from "lucide-react";
 
 export default function EditionLayout({ children }) {
@@ -32,13 +32,19 @@ export default function EditionLayout({ children }) {
   });
 
   const registerActions = useCallback((nextActions = {}) => {
-    setActions({
-      onSave: nextActions.onSave || null,
+    setActions((prev) => ({
+      onSave:
+        nextActions.onSave !== undefined ? nextActions.onSave : prev.onSave,
       disabled:
-        typeof nextActions.disabled === "boolean" ? nextActions.disabled : true,
-      loading: nextActions.loading || false,
-      label: nextActions.label || "",
-    });
+        typeof nextActions.disabled === "boolean"
+          ? nextActions.disabled
+          : prev.disabled,
+      loading:
+        typeof nextActions.loading === "boolean"
+          ? nextActions.loading
+          : prev.loading,
+      label: nextActions.label !== undefined ? nextActions.label : prev.label,
+    }));
   }, []);
 
   // 2. BLOQUEAR SCROLL EN MOBILE AL ABRIR MENU

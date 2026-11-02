@@ -48,7 +48,7 @@ export default function RootLayout({ children }) {
     empleadoData?.nombre || userData?.name || "Usuario",
   );
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState(true);
 
@@ -222,7 +222,7 @@ export default function RootLayout({ children }) {
             </div>
 
             {/* Navigation */}
-            <nav className="flex-1 overflow-y-auto py-4 px-3">
+            <nav className="sidebar-scroll flex-1 overflow-y-auto py-4 px-3">
               <ul className="space-y-1 whitespace-nowrap">
                 {dashboardLinks.map((link) => {
                   if (!shouldShowLink(link)) return null;
@@ -370,7 +370,7 @@ export default function RootLayout({ children }) {
           </aside>
 
           {/* Main content */}
-          <div className="flex flex-col flex-1 min-w-0 ml-20 transition-all duration-300">
+          <div className={`flex flex-col flex-1 min-w-0 ${isSidebarOpen ? "ml-64" : "ml-20"} transition-all duration-300`}>
             {/* Header */}
             <header className="z-10 h-16 flex items-center justify-between px-6 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
               <h1 className="text-xl font-semibold text-gray-800 dark:text-white">
@@ -379,7 +379,7 @@ export default function RootLayout({ children }) {
             </header>
 
             {/* Page content */}
-            <main className="flex-1 overflow-y-auto overflow-x-hidden bg-gray-50 dark:bg-gray-900 p-0">
+            <main className="main-scroll flex-1 overflow-y-auto overflow-x-hidden bg-gray-50 dark:bg-gray-900 p-0">
               {children}
             </main>
           </div>

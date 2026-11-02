@@ -477,8 +477,8 @@ export default function Page() {
 
           {isLoading ? (
             <div className="flex justify-center items-center py-20">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-primary"></div>
-              <p className="ml-4 text-blue-primary">Cargando empleados...</p>
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+              <p className="ml-4 text-blue-600">Cargando empleados...</p>
             </div>
           ) : filteredData.length === 0 ? (
             <div className="text-center py-10 text-gray-500">
