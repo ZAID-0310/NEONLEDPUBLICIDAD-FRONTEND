@@ -417,7 +417,7 @@ const Customer = () => {
     showCreateModal: false,
     showEditModal: false,
     customerToEdit: null,
-    isRefreshing: false,
+    isRefreshing: true,
     currentPage: 1,
     totalPages: 1,
     isCreating: false,
@@ -671,41 +671,57 @@ const Customer = () => {
             </div>
           </div>
 
-          {/* Cards para móvil */}
-          <div className="block md:hidden">
-            {paginatedData.length > 0 ? (
-              paginatedData.map((customer, idx) => (
-                <CustomerCard
-                  key={customer.id}
-                  customer={customer}
+          {state.isRefreshing ? (
+            <div
+              className="flex justify-center items-center py-20"
+              role="status"
+              aria-live="polite"
+            >
+              <div
+                className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"
+                aria-hidden="true"
+              />
+              <p className="ml-4 text-blue-600">Cargando clientes...</p>
+            </div>
+          ) : (
+            <>
+              {/* Cards para móvil */}
+              <div className="block md:hidden">
+                {paginatedData.length > 0 ? (
+                  paginatedData.map((customer, idx) => (
+                    <CustomerCard
+                      key={customer.id}
+                      customer={customer}
+                      handleEditClick={handleEditClick}
+                      handleDeleteClick={handleDeleteClick}
+                      index={idx}
+                    />
+                  ))
+                ) : (
+                  <div className="bg-white dark:bg-gray-800 rounded-lg p-8 text-center">
+                    <p className="text-gray-500 dark:text-gray-400">
+                      {state.searchTerm
+                        ? `No se encontraron resultados para "${state.searchTerm}"`
+                        : "No hay clientes registrados"}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Tabla para desktop */}
+              <div className="hidden md:block bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm">
+                <CustomerTable
+                  customers={paginatedData}
+                  searchTerm={state.searchTerm}
                   handleEditClick={handleEditClick}
                   handleDeleteClick={handleDeleteClick}
-                  index={idx}
                 />
-              ))
-            ) : (
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-8 text-center">
-                <p className="text-gray-500 dark:text-gray-400">
-                  {state.searchTerm
-                    ? `No se encontraron resultados para "${state.searchTerm}"`
-                    : "No hay clientes registrados"}
-                </p>
               </div>
-            )}
-          </div>
-
-          {/* Tabla para desktop */}
-          <div className="hidden md:block bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm">
-            <CustomerTable
-              customers={paginatedData}
-              searchTerm={state.searchTerm}
-              handleEditClick={handleEditClick}
-              handleDeleteClick={handleDeleteClick}
-            />
-          </div>
+            </>
+          )}
 
           {/* Paginación */}
-          {state.customers.length > 0 && (
+          {!state.isRefreshing && state.customers.length > 0 && (
             <Pagination
               currentPage={state.currentPage}
               totalPages={state.totalPages}
