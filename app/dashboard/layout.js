@@ -205,7 +205,7 @@ export default function RootLayout({ children }) {
                 <Image
                   src="/dashboard/main-icon.svg"
                   alt="Logo"
-                  className="h-8 w-8 flex-shrink-0"
+                  className="h-8 w-8 flex-shrink-0 dark:invert"
                   width={200}
                   height={300}
                 />
