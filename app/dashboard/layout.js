@@ -48,7 +48,7 @@ export default function RootLayout({ children }) {
     empleadoData?.nombre || userData?.name || "Usuario",
   );
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [isSidebarOpen, setSidebarOpen] = useState(true);
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState(true);
 
@@ -103,7 +103,10 @@ export default function RootLayout({ children }) {
       setIsAuthorized(true);
     }
   }, [pathname, router]);
-
+useEffect(() => {
+  setSidebarOpen(true);
+}, []);
+  
   // Efecto para el tema
   useEffect(() => {
     const savedMode = localStorage.getItem("darkMode") === "true";
