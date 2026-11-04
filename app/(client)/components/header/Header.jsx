@@ -39,11 +39,15 @@ export default function Header() {
 
   // Filtrado de los links segun permisos y roles del usuario
   const filterLinks = dashboardLinks.filter((item) => {
-    const hasPermission =
-      !item.permission || auth_service.hasPermission(item.permission);
-    const hasRole = !item.role || auth_service.hasRole(item.role);
-    return hasPermission && hasRole;
-  });
+  const hasPermission = !item.permission || auth_service.hasPermission(item.permission);
+  
+  let hasRole = true;
+  if (item.roles && item.roles.length > 0) {
+    hasRole = item.roles.some((rolPermitido) => auth_service.hasRole(rolPermitido));
+  }
+  
+  return hasPermission && hasRole;
+});
 
   useEffect(() => {
     const savedMenuState = localStorage.getItem("menuActive");
@@ -289,7 +293,7 @@ export default function Header() {
               onClick={() => setIsPanelOpen((prev) => !prev)}
             >
               <p className="flex items-center gap-1">
-                PANEL{" "}
+                Panel{" "}
                 <ChevronDown
                   className="w-4 h-4"
                   style={{
@@ -346,7 +350,7 @@ export default function Header() {
                   : "text-white hover:text-gray-300"
               }`}
             >
-              INGRESAR
+              Ingresar
             </a>
           )}
         </nav>
@@ -658,9 +662,9 @@ export default function Header() {
               }}
             />
 
-            {filterLinks.map((link, index) => (
+            {filterLinks.map((link) => (
               <DropdownLink
-                key={link.href}
+                key={`${link.href}-${link.title}`} 
                 text={link.title}
                 link={link.href}
                 isInicio={false}
