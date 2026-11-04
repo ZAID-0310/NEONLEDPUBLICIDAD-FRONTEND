@@ -438,7 +438,7 @@ export default function Page() {
   );
 
   return (
-    <main className="p-4 md:p-6 flex flex-col w-full h-[100vh] bg-gray-50 dark:bg-gray-900">
+    <main className="p-4 md:p-6 flex flex-col w-full min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="bg-white rounded-xl shadow-sm p-6 mb-6 dark:bg-gray-800 dark:text-white">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
           <h1 className="text-2xl font-bold text-gray-800 dark:text-white ">
@@ -451,7 +451,7 @@ export default function Page() {
               <input
                 type="text"
                 placeholder="Buscar por nombre, correo o ID..."
-                className="pl-10 pr-4 py-2 w-full rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#8c52ff] focus:border-transparent"
+                className="pl-10 pr-4 py-2 w-full rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#8c52ff] focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -460,7 +460,7 @@ export default function Page() {
             <div className="flex gap-2">
               <button
                 onClick={exportToCSV}
-                className="flex items-center gap-2 px-3 py-2 bg-green-50 text-green-600 rounded-lg border border-green-100 hover:bg-green-100 transition-colors"
+                className="flex items-center gap-2 px-3 py-2 bg-green-50 text-green-600 rounded-lg border border-green-100 hover:bg-green-100 transition-colors dark:bg-green-900/20 dark:text-green-400 dark:border-green-800/40 dark:hover:bg-green-900/40"
                 title="Exportar a CSV"
               >
                 <Download size={18} />
@@ -470,7 +470,7 @@ export default function Page() {
               <button
                 onClick={() => fetchReclamacion()}
                 disabled={isRefreshing}
-                className={`flex items-center gap-2 px-3 py-2 bg-blue-50 text-blue-600 rounded-lg border border-blue-100 hover:bg-blue-100 transition-colors ${isRefreshing ? "opacity-70 cursor-not-allowed" : ""}`}
+                className={`flex items-center gap-2 px-3 py-2 bg-blue-50 text-blue-600 rounded-lg border border-blue-100 hover:bg-blue-100 transition-colors dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/40 dark:hover:bg-blue-900/40 ${isRefreshing ? "opacity-70 cursor-not-allowed" : ""}`}
                 title="Actualizar datos"
               >
                 {isRefreshing ? (
@@ -487,7 +487,7 @@ export default function Page() {
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-16">
             <Loader2 className="h-10 w-10 text-[#8c52ff] animate-spin mb-4" />
-            <p className="text-gray-500 font-medium">
+            <p className="text-gray-500 dark:text-gray-400 font-medium">
               Cargando reclamaciones...
             </p>
           </div>
@@ -505,19 +505,19 @@ export default function Page() {
                   ))
                 ) : (
                   <div className="flex flex-col items-center justify-center py-16">
-                    <Filter className="h-12 w-12 text-gray-300 mb-3" />
-                    <p className="text-gray-500 font-medium mb-1">
+                    <Filter className="h-12 w-12 text-gray-300 dark:text-gray-600 mb-3" />
+                    <p className="text-gray-500 dark:text-gray-400 font-medium mb-1">
                       No hay reclamaciones disponibles
                     </p>
                     {searchTerm && (
-                      <p className="text-gray-400 text-sm">
+                      <p className="text-gray-400 dark:text-gray-500 text-sm">
                         No se encontraron resultados para "{searchTerm}"
                       </p>
                     )}
                     {searchTerm && (
                       <button
                         onClick={() => setSearchTerm("")}
-                        className="mt-3 text-[#8c52ff] text-sm font-medium hover:underline"
+                        className="mt-3 text-blue-600 dark:text-blue-400 text-sm font-medium hover:underline"
                       >
                         Limpiar búsqueda
                       </button>

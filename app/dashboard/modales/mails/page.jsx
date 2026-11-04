@@ -145,7 +145,7 @@ function PageContent() {
       return (
         <Badge
           variant="success"
-          className="bg-green-100 text-green-800 hover:bg-green-200"
+          className="bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900/40 dark:text-green-300"
         >
           <CheckCircle className="w-3 h-3 mr-1" /> Enviado Correctamente
         </Badge>
@@ -160,7 +160,7 @@ function PageContent() {
       return (
         <Badge
           variant="outline"
-          className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200"
+          className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200 dark:bg-yellow-900/40 dark:text-yellow-300 dark:border-yellow-700"
         >
           <Clock className="w-3 h-3 mr-1" /> Pendiente de Envío
         </Badge>
@@ -181,7 +181,7 @@ function PageContent() {
   };
 
   return (
-    <div className="container mx-auto p-4 space-y-6">
+    <div className="container mx-auto p-4 space-y-6 text-gray-900 dark:text-gray-100">
       <button
         className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-all duration-300 shadow-sm group"
         onClick={() => router.push("/dashboard/modales/")}
@@ -190,7 +190,7 @@ function PageContent() {
         Volver a la lista
       </button>
 
-      <h1 className="text-2xl font-bold text-center">
+      <h1 className="text-2xl font-bold text-center text-gray-800 dark:text-white">
         Detalles de Comunicaciones
       </h1>
 
@@ -204,8 +204,8 @@ function PageContent() {
       ) : (
         <div className="grid md:grid-cols-2 gap-6">
           <Card className="shadow-md hover:shadow-lg transition-shadow">
-            <CardHeader className="bg-blue-50 rounded-t-lg">
-              <CardTitle className="flex items-center gap-2 text-blue-700">
+            <CardHeader className="bg-blue-50 dark:bg-blue-950/40 rounded-t-lg border-b dark:border-gray-800">
+              <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
                 <Mail className="h-5 w-5" />
                 Correos Electrónicos Enviados
               </CardTitle>
@@ -220,7 +220,7 @@ function PageContent() {
                   return (
                     <div
                       key={index}
-                      className="border rounded-lg p-4 hover:bg-gray-50 transition-colors mb-4"
+                      className="border dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800/60 transition-colors mb-4"
                     >
                       <div className="flex justify-between items-start mb-2">
                         <h3 className="font-medium">
@@ -238,7 +238,7 @@ function PageContent() {
                         )}
 
                         {mail.estado != 0 && (
-                          <div className="flex items-center gap-1 text-gray-600 mt-1">
+                          <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400 mt-1">
                             <Clock className="h-4 w-4" />
                             <span>Enviado el {formatDate(mail.fecha)}</span>
                           </div>
@@ -280,8 +280,8 @@ function PageContent() {
           </Card>
 
           <Card className="shadow-md hover:shadow-lg transition-shadow">
-            <CardHeader className="bg-green-50 rounded-t-lg">
-              <CardTitle className="flex items-center gap-2 text-green-700">
+            <CardHeader className="bg-green-50 dark:bg-green-950/40 rounded-t-lg border-b dark:border-gray-800">
+              <CardTitle className="flex items-center gap-2 text-green-700 dark:text-green-300">
                 <MessageCircle className="h-5 w-5" />
                 Mensajes de WhatsApp Enviados
               </CardTitle>
@@ -299,7 +299,7 @@ function PageContent() {
                       return (
                         <div
                           key={index}
-                          className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                          className="border dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800/60 transition-colors"
                         >
                           <div className="flex justify-between items-start mb-2">
                             <h3 className="font-medium">
@@ -317,7 +317,7 @@ function PageContent() {
                             )}
 
                             {wat.estado != 0 && (
-                              <div className="flex items-center gap-1 text-gray-600">
+                              <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
                                 <Clock className="h-4 w-4" />
                                 <span>Enviado el {formatDate(wat.fecha)}</span>
                               </div>
@@ -353,7 +353,7 @@ function PageContent() {
                     })}
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center h-full text-gray-500 p-6">
+                  <div className="flex flex-col items-center justify-center h-full text-gray-500 dark:text-gray-400 p-6">
                     <MessageCircle className="h-12 w-12 mb-2 text-gray-400" />
                     <p>No hay mensajes de WhatsApp para mostrar</p>
                   </div>
