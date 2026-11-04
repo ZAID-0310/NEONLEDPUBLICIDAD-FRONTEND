@@ -94,7 +94,7 @@ export default function Page() {
       <div className="max-w-6xl mx-auto">
         <div className="mb-3">
           <button
-            className="bg-white dark:bg-gray-800 text-grfay-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition duration-300 flex items-center shadow-sm text-sm"
+            className="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition duration-300 flex items-center shadow-sm text-sm"
             onClick={() => router.push("/dashboard/reclamaciones/")}
           >
             <ArrowLeft className="w-3.5 h-3.5 mr-1.5" />

@@ -494,7 +494,7 @@ export default function Page() {
               <input
                 type="text"
                 placeholder="Buscar por nombre, correo o ID..."
-                className="pl-10 pr-4 py-2 w-full rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0d6fdc] focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                className="pl-10 pr-4 py-2 w-full rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0d6fdc] focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -503,7 +503,7 @@ export default function Page() {
             <div className="flex gap-2 justify-end">
               <button
                 onClick={exportToCSV}
-                className="flex items-center gap-2 px-3 py-2 bg-green-50 text-green-600 rounded-lg border border-green-100 hover:bg-green-100 transition-colors dark:bg-green-900/20 dark:text-green-400"
+                className="flex items-center gap-2 px-3 py-2 bg-green-50 text-green-600 rounded-lg border border-green-100 hover:bg-green-100 transition-colors dark:bg-green-900/20 dark:text-green-400 dark:border-green-800/40 dark:hover:bg-green-900/40"
                 title="Exportar a CSV"
               >
                 <Download size={18} />
@@ -513,7 +513,7 @@ export default function Page() {
               <button
                 onClick={() => fetchModals(currentPage, true)}
                 disabled={isRefreshing}
-                className={`flex items-center gap-2 px-3 py-2 bg-blue-50 text-blue-600 rounded-lg border border-blue-100 hover:bg-blue-100 transition-colors dark:bg-blue-900/20 dark:text-blue-400 ${
+                className={`flex items-center gap-2 px-3 py-2 bg-blue-50 text-blue-600 rounded-lg border border-blue-100 hover:bg-blue-100 transition-colors dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/40 dark:hover:bg-blue-900/40 ${
                   isRefreshing ? "opacity-70 cursor-not-allowed" : ""
                 }`}
                 title="Actualizar datos"
