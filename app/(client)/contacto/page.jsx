@@ -430,7 +430,7 @@ const Contacto = () => {
         />
 
         <div
-          className="absolute bottom-0 left-0 w-full h-1/2 bg-cover bg-center bg-no-repeat mb-16"
+          className="absolute bottom-0 left-0 w-full h-1/2 bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage: "url('/contacto/fondo contacto.jpg')",
           }}
