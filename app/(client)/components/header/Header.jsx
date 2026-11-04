@@ -289,7 +289,7 @@ export default function Header() {
               onClick={() => setIsPanelOpen((prev) => !prev)}
             >
               <p className="flex items-center gap-1">
-                Panel{" "}
+                PANEL{" "}
                 <ChevronDown
                   className="w-4 h-4"
                   style={{
@@ -346,7 +346,7 @@ export default function Header() {
                   : "text-white hover:text-gray-300"
               }`}
             >
-              Ingresar
+              INGRESAR
             </a>
           )}
         </nav>
