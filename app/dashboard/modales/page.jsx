@@ -31,7 +31,7 @@ const API_BASE_URL = `${url}/api/modales`;
 const PRODUCTOS_URL = `${url}/api/productos`;
 const ROW_HEIGHT = 65;
 const RESERVED_HEIGHT = 330;
-const MIN_ITEMS = 4;
+const MIN_ITEMS = 10;
 const MAX_ITEMS = 50;
 
 function calcItemsPerPage() {
@@ -760,7 +760,7 @@ export default function Page() {
                 filteredData={filteredData}
                 currentPage={currentPage}
                 totalPages={totalPages}
-                itemsPerPage={ITEMS_PER_PAGE}
+                itemsPerPage={itemsPerPage ?? MIN_ITEMS}
                 entityName="modales"
                 totalItems={
                   searchTerm.trim() !== "" ? filteredData.length : totalRecords
