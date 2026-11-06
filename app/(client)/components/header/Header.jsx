@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import DropdownLink from "./components/DropdownLink";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AutContext";
@@ -32,6 +32,24 @@ export default function Header() {
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [isProductosOpen, setIsProductosOpen] = useState(false);
+  const productosRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        productosRef.current &&
+        !productosRef.current.contains(event.target)
+      ) {
+        setIsProductosOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
   const [logoSrc, setLogoSrc] = useState(
     "/header_footer/Logo.oficial.Neon.Led.Publicidad.webp",
   );
@@ -146,6 +164,47 @@ export default function Header() {
     return false;
   };
 
+  const handleFaqClick = (e) => {
+    if (e && typeof e.preventDefault === "function") e.preventDefault();
+    setIsProductosOpen(false);
+    setMenuActive(false);
+    setContainerFullHeight(false);
+    setCurrentMenu("main");
+
+    if (pathname === "/productos") {
+      setTimeout(() => {
+        const el = document.getElementById("preguntas-frecuentes");
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 60);
+      if (typeof window !== "undefined" && window.location.hash !== "#preguntas-frecuentes") {
+        window.history.pushState(null, "", "/productos#preguntas-frecuentes");
+      }
+    } else {
+      router.push("/productos#preguntas-frecuentes");
+    }
+  };
+
+  const handleCatalogoClick = (e) => {
+    if (e && typeof e.preventDefault === "function") e.preventDefault();
+    setIsProductosOpen(false);
+    setMenuActive(false);
+    setContainerFullHeight(false);
+    setCurrentMenu("main");
+
+    if (pathname === "/productos") {
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }, 60);
+      if (typeof window !== "undefined" && window.location.hash) {
+        window.history.pushState(null, "", "/productos");
+      }
+    } else {
+      router.push("/productos");
+    }
+  };
+
   const handleLogout = async () => {
     setIsLoggingOut(true);
     setIsPanelOpen(false);
@@ -253,16 +312,56 @@ export default function Header() {
             NOSOTROS
           </a>
 
-          <a
-            href="/productos"
-            className={`transition-colors ${
-              isActiveLink("/productos")
-                ? "text-blue-400"
-                : "text-white hover:text-gray-300"
-            }`}
+          <div
+            ref={productosRef}
+            className="relative py-2"
+            onMouseEnter={() => setIsProductosOpen(true)}
+            onMouseLeave={() => setIsProductosOpen(false)}
           >
-            PRODUCTOS
-          </a>
+            <button
+              type="button"
+              onClick={() => setIsProductosOpen((prev) => !prev)}
+              className={`transition-colors flex items-center gap-1 cursor-pointer ${
+                isActiveLink("/productos")
+                  ? "text-blue-400"
+                  : "text-white hover:text-gray-300"
+              }`}
+            >
+              PRODUCTOS
+              <ChevronDown
+                className="w-4 h-4 transition-transform duration-200"
+                style={{
+                  transform: isProductosOpen ? "rotate(180deg)" : "rotate(0deg)",
+                }}
+              />
+            </button>
+
+            {isProductosOpen && (
+              <div className="absolute left-0 top-full pt-2 z-[99999]">
+                <ul className="w-56 bg-[#000017] rounded-lg shadow-xl text-white border border-white/10 overflow-hidden divide-y divide-white/10">
+                  <li className="hover:bg-blue-600 transition-colors">
+                    <a
+                      href="/productos"
+                      className="block px-4 py-3 text-sm font-medium cursor-pointer"
+                      onClick={handleCatalogoClick}
+                    >
+                      Catálogo de productos
+                    </a>
+                  </li>
+
+                  <li className="hover:bg-blue-600 transition-colors">
+                    <a
+                      href="/productos#preguntas-frecuentes"
+                      className="block px-4 py-3 text-sm font-medium cursor-pointer"
+                      onClick={handleFaqClick}
+                    >
+                      Preguntas frecuentes
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            )}
+          </div>
 
           <a
             href="/contacto"
@@ -474,10 +573,11 @@ export default function Header() {
         {currentMenu === "productos" && (
           <>
             <DropdownLink
-              text={"Todos los productos"}
+              text={"Catálogo de productos"}
               link={"/productos"}
               isInicio={true}
               final={false}
+              onClick={handleCatalogoClick}
               closeMenu={() => {
                 setMenuActive(false);
                 setContainerFullHeight(false);
@@ -642,7 +742,19 @@ export default function Header() {
               text={"Techos Led"}
               link={"/productos/techos-led"}
               isInicio={false}
+              final={false}
+              closeMenu={() => {
+                setMenuActive(false);
+                setContainerFullHeight(false);
+                setCurrentMenu("main");
+              }}
+            />
+            <DropdownLink
+              text={"Preguntas frecuentes"}
+              link={"/productos#preguntas-frecuentes"}
+              isInicio={false}
               final={true}
+              onClick={handleFaqClick}
               closeMenu={() => {
                 setMenuActive(false);
                 setContainerFullHeight(false);

@@ -38,7 +38,9 @@ const Productos = dynamic(
 const PreguntasFrecPrincipal = dynamic(
   () => import("./components/PreguntasFrecPrincipal"),
   {
-    loading: () => <div className="h-[300px]" />,
+    loading: () => (
+      <div id="preguntas-frecuentes" className="h-[300px] scroll-mt-[110px]" />
+    ),
   }
 );
 
