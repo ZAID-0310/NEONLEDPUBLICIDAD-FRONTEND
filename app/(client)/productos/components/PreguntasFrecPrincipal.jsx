@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import PreguntasFrecIndividual from "./PreguntasFrecIndividual";
@@ -223,60 +223,88 @@ export default function PreguntasFrecPrincipal() {
     setActiveIndex(activeIndex === index ? null : index);
   };
 
+  useEffect(() => {
+    const scrollToFaq = () => {
+      if (
+        typeof window !== "undefined" &&
+        window.location.hash === "#preguntas-frecuentes"
+      ) {
+        const el = document.getElementById("preguntas-frecuentes");
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth" });
+        }
+      }
+    };
+
+    scrollToFaq();
+    const t1 = setTimeout(scrollToFaq, 300);
+    const t2 = setTimeout(scrollToFaq, 800);
+
+    window.addEventListener("hashchange", scrollToFaq);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      window.removeEventListener("hashchange", scrollToFaq);
+    };
+  }, []);
+
   let globalIndex = 0;
 
   return (
-    <section className="mt-10 md:mt-20 pb-10 px-4 md:px-8">
-      <div className="max-w-5xl mx-auto">
-        <div className="mb-12 text-center">
-          <div className="flex flex-col md:flex-row items-center justify-center gap-4">
-            <Image
-              src="/productos/preguntas/Eón-Pensativo.png"
-              alt="Preguntas frecuentes"
-              width={140}
-              height={140}
-            />
+    <section
+      id="preguntas-frecuentes"
+      className="mt-10 md:mt-20 pb-10 px-4 md:px-8 scroll-mt-[110px]"
+    >
+        <div className="max-w-5xl mx-auto">
+          <div className="mb-12 text-center">
+            <div className="flex flex-col md:flex-row items-center justify-center gap-4">
+              <Image
+                src="/productos/preguntas/Eón-Pensativo.png"
+                alt="Preguntas frecuentes"
+                width={140}
+                height={140}
+              />
 
-            <div>
-              <h2 className="text-white text-2xl md:text-4xl font-bold">
-                Preguntas Frecuentes
-              </h2>
+              <div>
+                <h2 className="text-white text-2xl md:text-4xl font-bold">
+                  Preguntas Frecuentes
+                </h2>
 
-              <div className="w-24 h-1 bg-[#44b0f8] mx-auto mt-6 rounded-full" />
-            </div>
-          </div>
-        </div>
-
-        {faqData.map((section, sectionIndex) => {
-          return (
-            <div
-              key={section.category}
-              className="pb-10"
-            >
-              <h3 className="text-white text-xl md:text-2xl font-semibold mb-4 pl-3">
-                {section.category}
-              </h3>
-
-              <div className="space-y-3">
-                {section.items.map((item) => {
-                  const currentIndex = globalIndex++;
-
-                  return (
-                    <PreguntasFrecIndividual
-                      key={currentIndex}
-                      id={currentIndex}
-                      question={item.question}
-                      answer={item.answer}
-                      isOpen={activeIndex === currentIndex}
-                      onToggle={() => handleToggle(currentIndex)}
-                    />
-                  );
-                })}
+                <div className="w-24 h-1 bg-[#44b0f8] mx-auto mt-6 rounded-full" />
               </div>
             </div>
-          );
-        })}
-      </div>
+          </div>
+
+          {faqData.map((section, sectionIndex) => {
+            return (
+              <div
+                key={section.category}
+                className="pb-10"
+              >
+                <h3 className="text-white text-xl md:text-2xl font-semibold mb-4 pl-3">
+                  {section.category}
+                </h3>
+
+                <div className="space-y-3">
+                  {section.items.map((item) => {
+                    const currentIndex = globalIndex++;
+
+                    return (
+                      <PreguntasFrecIndividual
+                        key={currentIndex}
+                        id={currentIndex}
+                        question={item.question}
+                        answer={item.answer}
+                        isOpen={activeIndex === currentIndex}
+                        onToggle={() => handleToggle(currentIndex)}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
     </section>
   );
 }

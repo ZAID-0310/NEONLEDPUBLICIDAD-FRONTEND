@@ -17,19 +17,13 @@ export const dashboardLinks = [
     href: "/dashboard/main",
     title: "Panel Principal",
     icon: Home,
-    role: "administrador",
+    roles: ["administrador", "marketing", "ventas"],
   },
   {
     href: "/dashboard/main",
     title: "Mi Perfil",
     icon: User,
-    role: "cliente",
-  },
-  {
-    href: "/dashboard/user-client/main",
-    title: "Sección Principal",
-    icon: Home,
-    role: "cliente",
+    roles: ["cliente"],
   },
   {
     href: "/dashboard/empleados",

@@ -36,32 +36,26 @@ export const AuthProvider = ({ children }) => {
         const res = await auth_service.me();
 
         if (res && res.user) {
-          // rol solo viene del backend 
-          const rolUsuario = res.rol || "cliente"; // rol por defecto
+          const rolUsuario = res.rol || "cliente"; 
           const usuarioConRol = {
             ...res.user,
             rol: rolUsuario,
             permisos: res.permisos || [],
           };
 
-          // El estado de React sí lleva rol y permisos (en memoria)
           setIsAuthenticated(true);
           setUser(usuarioConRol);
 
-          // La cookie user no lleva rol ni permisos
           setCookie("user", JSON.stringify(sinAutorizacion(res.user)), {
             maxAge: 300 * 60,
             path: "/",
           });
 
-          if (pathname === "/login/") {
-            router.replace("/dashboard/main");
-          }
         } else {
           setIsAuthenticated(false);
           setUser(null);
           auth_service.clearAuthCookies();
-          router.replace("/login");
+          router.replace("/login"); 
         }
       } catch (error) {
         console.error("Error al verificar el token:", error);
@@ -72,7 +66,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     verifyToken();
-  }, [pathname, router]);
+  }, []);
 
   const login = async (formData) => {
     try {
