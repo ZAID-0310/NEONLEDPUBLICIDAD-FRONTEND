@@ -41,7 +41,14 @@ export default function Header() {
   const filterLinks = dashboardLinks.filter((item) => {
     const hasPermission =
       !item.permission || auth_service.hasPermission(item.permission);
-    const hasRole = !item.role || auth_service.hasRole(item.role);
+
+    let hasRole = true;
+    if (item.roles && item.roles.length > 0) {
+      hasRole = item.roles.some((rolPermitido) =>
+        auth_service.hasRole(rolPermitido),
+      );
+    }
+
     return hasPermission && hasRole;
   });
 
@@ -658,9 +665,9 @@ export default function Header() {
               }}
             />
 
-            {filterLinks.map((link, index) => (
+            {filterLinks.map((link) => (
               <DropdownLink
-                key={link.href}
+                key={`${link.href}-${link.title}`}
                 text={link.title}
                 link={link.href}
                 isInicio={false}
