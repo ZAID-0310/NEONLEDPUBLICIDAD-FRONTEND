@@ -29,7 +29,15 @@ import { set } from "react-hook-form";
 
 const API_BASE_URL = `${url}/api/modales`;
 const PRODUCTOS_URL = `${url}/api/productos`;
-const ITEMS_PER_PAGE = 5;
+const ROW_HEIGHT = 65;
+const RESERVED_HEIGHT = 330;
+const MIN_ITEMS = 4;
+const MAX_ITEMS = 50;
+
+function calcItemsPerPage() {
+  const available = window.innerHeight - RESERVED_HEIGHT;
+  return Math.min(MAX_ITEMS, Math.max(MIN_ITEMS, Math.floor(available / ROW_HEIGHT)));
+}
 
 export default function Page() {
   const router = useRouter();
@@ -44,6 +52,11 @@ export default function Page() {
   const [productsById, setProductsById] = useState({});
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+    const [itemsPerPage, setItemsPerPage] = useState(null);
+
+  useEffect(() => {
+    setItemsPerPage(calcItemsPerPage());
+  }, []);
 
   // PROBLEMA: fetchProducts solo cargaba la página 1 (7 productos).
   // Los productos del 8 al 15 no estaban en el mapa → mostraban "No asignado".
@@ -111,7 +124,7 @@ export default function Page() {
     }
 
     try {
-      const response = await axios.get(`${API_BASE_URL}?page=${page}`, {
+      const response = await axios.get(`${API_BASE_URL}?page=${page}&per_page=${itemsPerPage}`, {
         headers: {
           Authorization: `Bearer ${getCookie("token")}`,
         },
@@ -320,8 +333,9 @@ export default function Page() {
   }, []);
 
   useEffect(() => {
-    fetchModals(currentPage);
-  }, [currentPage]);
+  if (itemsPerPage === null) return;
+  fetchModals(currentPage);
+}, [currentPage, itemsPerPage]);
 
   useEffect(() => {
     if (searchTerm.trim() === "") {
