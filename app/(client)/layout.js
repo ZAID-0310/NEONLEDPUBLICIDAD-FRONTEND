@@ -124,8 +124,10 @@ export default function ClientLayout({ children }) {
     }
   };
 
-  return (
-    <>
+        return (
+
+    <div className="bg-[--azul_oscuro] min-h-screen"> 
+      
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
@@ -136,8 +138,15 @@ export default function ClientLayout({ children }) {
       />
       
       <Header />
-      {children}
-      <Footer />
-    </>
+      <main>
+        {children}
+      </main>
+      
+     
+      <div className="bg-[##ffaabb] rounded-t-[40px] overflow-hidden w-full mt-10">
+        <Footer /> 
+      </div>
+
+    </div>
   );
 }
