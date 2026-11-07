@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }) => {
         const res = await auth_service.me();
 
         if (res && res.user) {
-          const rolUsuario = res.rol || "cliente"; 
+          const rolUsuario = res.rol || "cliente";
           const usuarioConRol = {
             ...res.user,
             rol: rolUsuario,
@@ -50,12 +50,14 @@ export const AuthProvider = ({ children }) => {
             maxAge: 300 * 60,
             path: "/",
           });
-
+          if (pathname === "/login/") {
+            router.replace("/dashboard/main");
+          }
         } else {
           setIsAuthenticated(false);
           setUser(null);
           auth_service.clearAuthCookies();
-          router.replace("/login"); 
+          router.replace("/login");
         }
       } catch (error) {
         console.error("Error al verificar el token:", error);
@@ -66,7 +68,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     verifyToken();
-  }, []);
+  }, [pathname, router]);
 
   const login = async (formData) => {
     try {
