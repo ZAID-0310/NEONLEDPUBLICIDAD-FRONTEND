@@ -25,12 +25,25 @@ import Pagination1 from "../components/Pagination1";
 import url from "../../../api/url";
 
 const URL_API = `${url}/api/contactanos`;
-const ITEMS_PER_PAGE = 5;
+const ROW_HEIGHT = 65;
+const RESERVED_HEIGHT = 330;
+const MIN_ITEMS = 10;
+const MAX_ITEMS = 50;
 
+function calcItemsPerPage() {
+  const available = window.innerHeight - RESERVED_HEIGHT;
+  return Math.min(MAX_ITEMS, Math.max(MIN_ITEMS, Math.floor(available / ROW_HEIGHT)));
+}
 export default function Page() {
   const searchParams = useSearchParams();
   const currentPage = searchParams.get("page") || 1;
   const [data, setData] = useState([]);
+
+    const [itemsPerPage, setItemsPerPage] = useState(null);
+
+  useEffect(() => {
+    setItemsPerPage(calcItemsPerPage());
+  }, []);
   const [filteredData, setFilteredData] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
@@ -79,7 +92,7 @@ export default function Page() {
 
     setData(allData);
     setFilteredData(allData);
-    setTotalPages(Math.ceil(allData.length / ITEMS_PER_PAGE));
+    setTotalPages(Math.ceil(allData.length / itemsPerPage));
     setIsLoading(false);
     setIsRefreshing(false);
   }
@@ -280,9 +293,10 @@ export default function Page() {
     }
   }
 
-  useEffect(() => {
-    fetchContacts(currentPage);
-  }, [currentPage]);
+ useEffect(() => {
+  if (itemsPerPage === null) return;
+  fetchContacts(currentPage);
+}, [currentPage, itemsPerPage]);
 
   useEffect(() => {
     if (searchTerm.trim() === "") {
@@ -451,10 +465,11 @@ export default function Page() {
     </div>
   );
 
-  const paginatedData = filteredData.slice(
-    (Number(currentPage) - 1) * ITEMS_PER_PAGE,
-    Number(currentPage) * ITEMS_PER_PAGE,
-  );
+ const perPage = itemsPerPage ?? MIN_ITEMS;
+const paginatedData = filteredData.slice(
+  (Number(currentPage) - 1) * perPage,
+  Number(currentPage) * perPage,
+);
 
   return (
     <main className="p-3 sm:p-4 md:p-6 flex flex-col w-full min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -710,7 +725,7 @@ export default function Page() {
               filteredData={filteredData}
               currentPage={currentPage}
               totalPages={totalPages}
-              itemsPerPage={ITEMS_PER_PAGE}
+              itemsPerPage={itemsPerPage ?? MIN_ITEMS}
             />
           </>
         )}

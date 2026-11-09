@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { getCookie } from "cookies-next";
 import { useRouter } from "next/navigation";
 import axios from "axios";
@@ -13,76 +13,52 @@ import {
   Calendar,
   CheckCircle,
   XCircle,
-  ServerIcon
+  ServerIcon,
 } from "lucide-react";
-
-const PRODUCTS_URL = `${url}/api/productos/`;
 
 export default function Page() {
   const router = useRouter();
   const [modal, setModal] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [productsById, setProductsById] = useState({});
-  const [productsLoading, setProductsLoading] = useState(true);
+  const [productName, setProductName] = useState("No asignado");
+  const [productLoading, setProductLoading] = useState(false);
 
   useEffect(() => {
     const infoModal = getCookie("modal");
-    fetchProducts();
     if (infoModal) {
-        setModal(safeJsonParse(infoModal, null));
+      const parsedModal = safeJsonParse(infoModal, null);
+      setModal(parsedModal);
+      if (parsedModal?.id_producto) {
+        fetchProductName(parsedModal.id_producto);
+      }
     }
     setLoading(false);
   }, []);
 
-  async function fetchProducts() {
-  setProductsLoading(true);
-  try {
-    const headers = { Authorization: `Bearer ${getCookie("token")}` };
-    const map = {};
-    let page = 1;
-    let lastPage = 1;
- 
-    do {
-      const res = await axios.get(`${PRODUCTS_URL}?page=${page}`, { headers });
-      // Nota: esta página usa PRODUCTS_URL (con S), no PRODUCTOS_URL
-      const payload = res.data;
- 
-      const list =
-        Array.isArray(payload) ? payload :
-        Array.isArray(payload?.data) ? payload.data :
-        Array.isArray(payload?.data?.data) ? payload.data.data :
-        Array.isArray(payload?.productos) ? payload.productos :
-        [];
- 
-      const meta = payload?.data ?? payload;
-      lastPage = meta?.last_page ?? meta?.meta?.last_page ?? 1;
- 
-      for (const p of list) {
-        map[p.id_producto] = p.nombre;
-      }
-      page++;
-    } while (page <= lastPage);
- 
-    setProductsById(map);
-  } catch (error) {
-    console.error("Error al obtener productos:", error?.message);
-    setProductsById({});
-  } finally {
-    setProductsLoading(false);
+  async function fetchProductName(idProducto) {
+    setProductLoading(true);
+    try {
+      const res = await axios.get(`${url}/api/productos/${idProducto}`, {
+        headers: { Authorization: `Bearer ${getCookie("token")}` },
+      });
+      // getById devuelve { status: 200, data: { nombre: '...', ... } }
+      setProductName(res.data?.data?.nombre || "No asignado");
+    } catch (error) {
+      console.error("Error al obtener producto por ID:", error?.message);
+      setProductName("No asignado");
+    } finally {
+      setProductLoading(false);
+    }
   }
-}
-
-  const productName = useMemo(() => {
-    if (!modal) return "No asignado"
-    return productsById[modal.id_producto] || "No asignado";
-  }, [modal, productsById]);
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
         <div className="flex flex-col items-center">
           <div className="w-10 h-10 border-4 border-t-[#0d6fdc] border-gray-200 dark:border-gray-700 rounded-full animate-spin"></div>
-          <p className="mt-3 text-gray-600 dark:text-gray-300 font-medium text-sm">Cargando datos...</p>
+          <p className="mt-3 text-gray-600 dark:text-gray-300 font-medium text-sm">
+            Cargando datos...
+          </p>
         </div>
       </div>
     );
@@ -108,7 +84,6 @@ export default function Page() {
   return (
     <div className="p-4 md:p-6 min-h-screen bg-slate-50 dark:bg-gray-900 transition-colors duration-300">
       <div className="max-w-5xl mx-auto flex flex-col gap-6">
-        
         {/* Botón Volver */}
         <div className="flex justify-start">
           <button
@@ -122,7 +97,6 @@ export default function Page() {
 
         {/* Tarjeta Principal */}
         <div className="bg-white dark:bg-gray-800 shadow-xl rounded-2xl overflow-hidden border border-slate-100 dark:border-gray-700">
-          
           {/* Encabezado con Gradiente */}
           <div className="bg-gradient-to-r from-[#0d6fdc] to-[#0a4ea1] dark:from-blue-700 dark:to-blue-950 p-6 md:p-8 text-white relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -mt-20 -mr-20 pointer-events-none"></div>
@@ -156,7 +130,6 @@ export default function Page() {
           {/* Grid de Contenido */}
           <div className="p-6 md:p-8">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-              
               {/* Nombre */}
               <div className="bg-slate-50 dark:bg-gray-700/40 rounded-xl p-5 flex flex-col items-center text-center transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 border border-slate-100 dark:border-gray-700/80">
                 <div className="bg-[#0d6fdc]/10 dark:bg-blue-500/20 p-3 rounded-full mb-3">
@@ -221,13 +194,11 @@ export default function Page() {
                   Producto de Interés
                 </h3>
                 <p className="text-base font-semibold text-slate-800 dark:text-white">
-                  {productsLoading ? "Cargando..." : (productsById[modal.id_producto] || "No asignado")}
+                  {productLoading ? "Cargando..." : productName}
                 </p>
               </div>
-
             </div>
           </div>
-
         </div>
       </div>
     </div>
