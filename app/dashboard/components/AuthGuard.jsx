@@ -1,80 +1,41 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getCookie, setCookie } from 'cookies-next';
-import auth_service from '../users/services/auth.service';
-
-// Quita rol y permisos antes de guardar user en cookie
-const sinAutorizacion = (user) => {
-  if (!user || typeof user !== 'object') return user;
-  const { rol, permisos, ...resto } = user;
-  return resto;
-};
+import { useAuth } from '@/app/context/AutContext'; // <-- Importamos el Contexto
 
 export default function AuthGuard({ children, requiredRole = null }) {
   const router = useRouter();
+  const { user, isAuthenticated } = useAuth(); 
+
   const [authorized, setAuthorized] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = getCookie('token');
-    
-    if (!token) {
+    if (isAuthenticated === undefined) return;
+    if (!isAuthenticated) {
+      router.replace('/login');
       setAuthorized(false);
-      router.push('/login');
+      setLoading(false);
       return;
     }
-
-    const checkUser = async () => {
-      try {
-        // info del user (me() también llena rol y permisos en memoria)
-        const userData = await auth_service.me();
-        
-        if (!userData || userData.error) {
-          throw new Error('Error al obtener información del usuario');
-        }
-        
-        // info de cookies (solo identidad, nunca rol ni permisos)
-        if (!getCookie('user') && userData.user) {
-          setCookie("user", JSON.stringify(sinAutorizacion(userData.user)), { maxAge: 30 * 24 * 60 * 60, path: "/" });
-        }
-        
-        if (!getCookie('empleado') && userData.empleado) {
-          setCookie("empleado", JSON.stringify(userData.empleado), { maxAge: 30 * 24 * 60 * 60, path: "/" });
-        }
-        
-        // verificar uno o varios roles
-        if (requiredRole) {
-          // convierte a array si es un string con formato "rol1,rol2,rol3"
-          const rolesArray = requiredRole && requiredRole.includes(',') 
-          ? requiredRole.split(',').map(role => role.trim())
-          : requiredRole ? [requiredRole] : [];
-            
-          // verifica si el usuario tiene al menos uno de los roles requeridos
-          // (hasRole lee la memoria, ya llenada por me() arriba)
-          const hasRequiredRole = rolesArray.some(role => 
-            auth_service.hasRole(role)
-          );
-          
-          if (!hasRequiredRole) {
-            router.push('/dashboard/unauthorized');
-            setAuthorized(false);
-            return;
-          }
-        }
-        
-        setAuthorized(true);
-      } catch (error) {
-        console.error("Error de autenticación:", error);
-        auth_service.logoutClient(router);
+    if (requiredRole) {
+      const rolesArray = requiredRole.includes(',') 
+        ? requiredRole.split(',').map(role => role.trim())
+        : [requiredRole];
+      const hasRequiredRole = rolesArray.some(role => {
+        return user?.rol?.toLowerCase() === role.toLowerCase();
+      });
+      if (!hasRequiredRole) {
+        router.replace('/dashboard/unauthorized');
         setAuthorized(false);
-      } finally {
         setLoading(false);
+        return;
       }
-    };
+    }
+    setAuthorized(true);
+    setLoading(false);
 
-    checkUser();
-  }, [router, requiredRole]);
+  }, [isAuthenticated, user, requiredRole, router]);
 
   if (loading) {
     return (
