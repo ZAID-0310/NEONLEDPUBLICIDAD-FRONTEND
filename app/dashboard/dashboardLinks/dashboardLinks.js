@@ -10,6 +10,7 @@ import {
   Settings,
   User,
   Star,
+  Package,
 } from "lucide-react";
 
 export const dashboardLinks = [
@@ -36,6 +37,12 @@ export const dashboardLinks = [
     title: "Clientes",
     icon: UserRoundPen,
     roles: ["administrador", "marketing", "ventas"],
+  },
+  {
+    href: "/dashboard/productos",
+    title: "Productos",
+    icon: Package,
+    roles: ["administrador"],
   },
   {
     href: "/dashboard/propuestas",

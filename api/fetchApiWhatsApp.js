@@ -115,7 +115,8 @@ export const whatsappApi = {
 // ─── POP-UPS agregamos esto ─────────────────────────────────────────────
 export const popupApi = {
   // Productos (para el selector)
-  getProductos: () => apiRequest("/api/productos", { method: "GET" }),
+  getProductos: () =>
+    apiRequest("/api/productos/activos-selector", { method: "GET" }),
 
   // Popup Configs
   getAll: () => apiRequest("/api/popup-configs", { method: "GET" }),
