@@ -49,22 +49,24 @@ export const SocialMedia = () => {
   ];
 
   return (
-    <div className="flex flex-nowrap gap-4 2xl:gap-10 justify-center items-center">
+    <div className="flex flex-wrap gap-3.5 items-center">
       {socialMedia.map(({ href, src, alt, title }, index) => (
         <a
           key={index}
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          className="hover:opacity-80 transition-all"
+          title={title}
+          aria-label={title}
+          className="w-10 h-10 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 hover:border-[#48A8FF]/60 hover:bg-[#48A8FF]/10 transition-all duration-200 hover:scale-105 active:scale-95"
         >
-          <div className="w-35px h-35px flex items-center justify-center">
+          <div className="w-[28px] h-[28px] flex items-center justify-center">
             <Image
               src={src}
               alt={alt}
               title={title}
-              width={35}
-              height={35}
+              width={28}
+              height={28}
               className="object-contain"
             />
           </div>
