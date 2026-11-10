@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Image from "next/image"
 import Swal from "sweetalert2"
+import "sweetalert2/dist/sweetalert2.min.css"
 import API_URL from "@/api/url"
 import { Inter } from "next/font/google"
 import { 
@@ -33,7 +34,7 @@ const Contacto = () => {
   const [status, setStatus] = useState(null)
 
   const textRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]*$/
-  const numberRegex = /^[+-]?\d*\.?\d*$/
+  const numberRegex = /^\+?\d*$/
   const textTypeInputs = ["nombre", "apellido", "distrito"]
 
   const handleChange = (e) => {
@@ -42,8 +43,9 @@ const Contacto = () => {
 
     if (textTypeInputs.includes(String(name)) && textRegex.test(value)) {
       newValue = value
-    } else if (String(name) === "telefono" && numberRegex.test(value)) {
-      newValue = value
+    } else if (String(name) === "telefono") {
+      const soloDigitos = value.replace(/\D/g, "").slice(0, 9)
+      newValue = soloDigitos
     } else if (["email", "tipo_reclamo", "mensaje"].includes(String(name))) {
       newValue = value
     } else {
@@ -53,8 +55,111 @@ const Contacto = () => {
     setFormData((prevData) => ({ ...prevData, [name]: newValue }))
   }
 
+  const validateForm = () => {
+  const errors = {}
+
+  // Nombre
+  if (!formData.nombre.trim()) {
+    errors.nombre = "El nombre es obligatorio."
+  } else if (formData.nombre.trim().length < 2) {
+    errors.nombre = "El nombre debe tener al menos 2 letras."
+  }
+
+  // Apellido
+  if (!formData.apellido.trim()) {
+    errors.apellido = "El apellido es obligatorio."
+  } else if (formData.apellido.trim().length < 2) {
+    errors.apellido = "El apellido debe tener al menos 2 letras."
+  }
+
+  // Teléfono (Perú: 9 dígitos empezando por 9)
+  const telefonoLimpio = formData.telefono.replace(/\s+/g, "")
+  if (!telefonoLimpio) {
+    errors.telefono = "El teléfono es obligatorio."
+  } else if (!/^(\+?51)?9\d{8}$/.test(telefonoLimpio)) {
+    errors.telefono = "Ingresa un teléfono válido (9 dígitos, ej. 994078320)."
+  }
+
+  // Distrito
+  if (!formData.distrito.trim()) {
+    errors.distrito = "El distrito es obligatorio."
+  }
+
+  // Email
+  if (!formData.email.trim()) {
+    errors.email = "El correo electrónico es obligatorio."
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(formData.email.trim())) {
+    errors.email = "Ingresa un correo válido (ej. nombre@correo.com)."
+  }
+
+  // Motivo
+  if (!formData.tipo_reclamo) {
+    errors.tipo_reclamo = "Selecciona un motivo de contacto."
+  }
+
+  // Mensaje
+  if (!formData.mensaje.trim()) {
+    errors.mensaje = "El mensaje es obligatorio."
+  } else if (formData.mensaje.trim().length < 10) {
+    errors.mensaje = "El mensaje debe tener al menos 10 caracteres."
+  }
+
+  return errors
+}
+
   const handleSubmit = async (e) => {
     e.preventDefault()
+    
+    //Validación antes de enviar
+  const validationErrors = validateForm()
+
+  if (Object.keys(validationErrors).length > 0) {
+    const primerCampo = Object.keys(validationErrors)[0]
+
+  Swal.fire({
+  title: "Revisa tus datos",
+  html: `
+    <ul style="text-align:left; margin:0 0 15px 0; padding-left:0; list-style-type: none;">
+  ${Object.values(validationErrors)
+    .map((msg) => `<li style="margin-bottom: 6px; display: flex; align-items: flex-start;">
+        <span style="color: #06b6d4; margin-right: 10px; font-weight: bold; text-shadow: 0 0 8px #06b6d4;">•</span> 
+        <span>${msg}</span>
+      </li>`)
+    .join("")}
+</ul>
+    
+    <!-- BARRA DE PROGRESO PERSONALIZADA -->
+    <div style="width: 100%; height: 6px; background: #1e293b; border-radius: 9999px; margin-top: 10px; overflow: hidden; position: relative;">
+      <div style="height: 100%; width: 100%; background: #06b6d4; border-radius: 9999px; position: absolute; left: 0; top: 0; animation: customProgressBar 3s linear forwards;"></div>
+    </div>
+    
+    <style>
+      @keyframes customProgressBar {
+        0% { width: 0%; }
+        100% { width: 100%; }
+      }
+      /* Asegurarnos de que el modal tenga espacio para la barra */
+      .swal2-html-container {
+        margin-bottom: 10px !important;
+      }
+    </style>
+  `,
+  icon: "warning",
+  background: "#0b1220",
+  color: "#ffffff",
+  confirmButtonColor: "#06b6d4",
+  timer: 3000,
+  timerProgressBar: false,  
+  showConfirmButton: false,   
+  allowOutsideClick: false,
+  allowEscapeKey: false,
+}).then((result) => {
+  document.getElementById(primerCampo)?.focus()
+})
+
+    return
+  }
+    
     setStatus("loading")
 
     try {
@@ -290,7 +395,7 @@ const Contacto = () => {
                   </p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} noValidate className="space-y-4">
                   {/* Nombre y Apellido */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
@@ -340,6 +445,7 @@ const Contacto = () => {
                         onChange={handleChange}
                         required
                         placeholder="999 999 999"
+                        maxLength={9}
                         className="w-full px-3.5 py-2.5 rounded-xl bg-[#090e1a] border border-slate-700/80 hover:border-slate-600 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 text-white placeholder:text-slate-500 text-sm transition-all duration-150 outline-none"
                       />
                     </div>
