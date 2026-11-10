@@ -139,8 +139,19 @@ const ProductoCard = ({ producto }) => (
         <Package size={16} className="text-blue-600 dark:text-blue-300" />
       </div>
       <span className="font-bold text-gray-900 dark:text-white">
-        {producto.nombre}
+        # {producto.id} - {producto.nombre}
       </span>
+      <div className="accordion ml-auto">
+        {producto.estado == 1 ? (
+          <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs md:text-sm font-semibold bg-emerald-500/20 border bg-green-100 text-green-800 backdrop-blur-sm">
+            Activo
+          </span>
+        ) : (
+          <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs md:text-sm font-semibold bg-rose-500/20  border bg-yellow-100 text-yellow-800 backdrop-blur-sm">
+            Inactivo
+          </span>
+        )}
+      </div>
     </div>
 
     <div className="space-y-2 text-sm">
@@ -171,19 +182,24 @@ const ProductoTable = ({ productos, searchTerm }) => (
   <Table>
     <TableHeader className="bg-blue-600">
       <TableRow className="hover:bg-blue-600">
-        {["id", "Nombre", "Descripción", "Creado por", "Fecha de Creación"].map(
-          (header) => (
-            <TableHead
-              key={header}
-              className="text-white text-center font-medium px-6 py-5"
-            >
-              {header}
-            </TableHead>
-          ),
-        )}
+        {[
+          "id",
+          "Nombre",
+          "Descripción",
+          "Creado por",
+          "Fecha de Creación",
+          "Estado",
+        ].map((header) => (
+          <TableHead
+            key={header}
+            className="text-white text-center font-medium px-6 py-5"
+          >
+            {header}
+          </TableHead>
+        ))}
       </TableRow>
     </TableHeader>
-    <TableBody className="divide-y divide-gray-200 dark:divide-gray-700">
+    <TableBody className="divide-y divide-gray-200 dark:divide-gray-700 text-center">
       {productos.length === 0 ? (
         <TableRow>
           <TableCell
@@ -221,6 +237,19 @@ const ProductoTable = ({ productos, searchTerm }) => (
             </TableCell>
             <TableCell className="px-6 py-5 text-gray-900 text-center whitespace-nowrap dark:text-white">
               {producto.fechaCreacion}
+            </TableCell>
+            <TableCell className="px-6 py-5 text-gray-900 text-center whitespace-nowrap dark:text-white">
+              <div>
+                {producto.estado == 1 ? (
+                  <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs md:text-sm font-semibold bg-emerald-500/20 border bg-green-100 text-green-800 backdrop-blur-sm">
+                    Activo
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs md:text-sm font-semibold bg-rose-500/20  border bg-yellow-100 text-yellow-800 backdrop-blur-sm">
+                    Inactivo
+                  </span>
+                )}
+              </div>
             </TableCell>
           </TableRow>
         ))
@@ -404,6 +433,7 @@ export default function Productos() {
             descripcion: p.descripcion,
             empleadoNombre: getEmpleadoNombre(p.empleado),
             fechaCreacion: formatDate(p.created_at),
+            estado: p.estado,
           })),
           totalPages: response.lastPage || 1,
           currentPage: response.currentPage || page,
@@ -508,7 +538,7 @@ export default function Productos() {
         </div>
 
         {/* Contenedor Principal */}
-        <div className="bg-gray-200 dark:bg-gray-800 rounded-b-2xl p-4 sm:p-6 md:p-8 shadow-lg">
+        <div className="bg-white dark:bg-gray-800 rounded-b-2xl p-4 sm:p-6 md:p-8 shadow-lg">
           {/* Búsqueda y Actualizar */}
           <div className="mb-6">
             <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4">
