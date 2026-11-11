@@ -36,7 +36,10 @@ const MAX_ITEMS = 50;
 
 function calcItemsPerPage() {
   const available = window.innerHeight - RESERVED_HEIGHT;
-  return Math.min(MAX_ITEMS, Math.max(MIN_ITEMS, Math.floor(available / ROW_HEIGHT)));
+  return Math.min(
+    MAX_ITEMS,
+    Math.max(MIN_ITEMS, Math.floor(available / ROW_HEIGHT)),
+  );
 }
 
 export default function Page() {
@@ -52,55 +55,26 @@ export default function Page() {
   const [productsById, setProductsById] = useState({});
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
-    const [itemsPerPage, setItemsPerPage] = useState(null);
+  const [itemsPerPage, setItemsPerPage] = useState(null);
 
   useEffect(() => {
     setItemsPerPage(calcItemsPerPage());
   }, []);
 
-  // PROBLEMA: fetchProducts solo cargaba la página 1 (7 productos).
-  // Los productos del 8 al 15 no estaban en el mapa → mostraban "No asignado".
-  //
-  // SOLUCIÓN: Iterar todas las páginas hasta tener los 15 productos completos.
-  // No requiere cambios en el backend.
-  // ══════════════════════════════════════════════════════════════════════════════
-
   async function fetchProducts() {
     setIsLoadingProducts(true);
     try {
-      const headers = { Authorization: `Bearer ${getCookie("token")}` };
+      const res = await axios.get(`${PRODUCTOS_URL}/nombres-map`, {
+        headers: { Authorization: `Bearer ${getCookie("token")}` },
+      });
+
+      // El endpoint devuelve: { status: 200, success: true, data: [{ id_producto, nombre }, ...] }
+      const items = res.data?.data || [];
       const map = {};
-      let page = 1;
-      let lastPage = 1;
 
-      // Iterar todas las páginas hasta tener todos los productos
-      do {
-        const res = await axios.get(`${PRODUCTOS_URL}?page=${page}`, {
-          headers,
-        });
-        const payload = res.data;
-
-        // Soporta múltiples formas de respuesta paginada
-        const list = Array.isArray(payload)
-          ? payload
-          : Array.isArray(payload?.data)
-            ? payload.data
-            : Array.isArray(payload?.data?.data)
-              ? payload.data.data
-              : Array.isArray(payload?.productos)
-                ? payload.productos
-                : [];
-
-        // Extraer last_page de la respuesta paginada de Laravel
-        const meta = payload?.data ?? payload;
-        lastPage = meta?.last_page ?? meta?.meta?.last_page ?? 1;
-
-        for (const p of list) {
-          map[p.id_producto] = p.nombre;
-        }
-
-        page++;
-      } while (page <= lastPage);
+      for (const p of items) {
+        map[p.id_producto] = p.nombre;
+      }
 
       setProductsById(map);
     } catch (error) {
@@ -124,11 +98,14 @@ export default function Page() {
     }
 
     try {
-      const response = await axios.get(`${API_BASE_URL}?page=${page}&per_page=${itemsPerPage}`, {
-        headers: {
-          Authorization: `Bearer ${getCookie("token")}`,
+      const response = await axios.get(
+        `${API_BASE_URL}?page=${page}&per_page=${itemsPerPage}`,
+        {
+          headers: {
+            Authorization: `Bearer ${getCookie("token")}`,
+          },
         },
-      });
+      );
 
       const data = response.data.data;
 
@@ -333,9 +310,9 @@ export default function Page() {
   }, []);
 
   useEffect(() => {
-  if (itemsPerPage === null) return;
-  fetchModals(currentPage);
-}, [currentPage, itemsPerPage]);
+    if (itemsPerPage === null) return;
+    fetchModals(currentPage);
+  }, [currentPage, itemsPerPage]);
 
   useEffect(() => {
     if (searchTerm.trim() === "") {
