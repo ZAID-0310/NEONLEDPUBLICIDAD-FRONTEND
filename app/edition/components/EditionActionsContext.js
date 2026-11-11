@@ -5,15 +5,17 @@ import { createContext, useContext } from "react";
 const EditionActionsContext = createContext({
   actions: {
     onSave: null,
-
     disabled: true,
-
     loading: false,
-
     label: "",
+    isDirty: false,
+    formLoading: false,
+    plantillaId: null,
+    clearDraft: null,
   },
 
   registerActions: () => {},
+  requestNavigation: () => {},
 });
 
 export function EditionActionsProvider({ value, children }) {
