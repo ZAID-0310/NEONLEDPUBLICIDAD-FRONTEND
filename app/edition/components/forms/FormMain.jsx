@@ -41,6 +41,7 @@ export default function FormMain({
   plantillaId = PLANTILLA_IDS.CLASICA,
   blogId = null,
   mode = "create",
+  templateOverride = false,
 
   // Props de callbacks
   onSuccess,
@@ -61,6 +62,7 @@ export default function FormMain({
   const {
     // Configuración
     plantillaConfig,
+    resolvedPlantillaId,
     isCreateMode,
     isEditMode,
 
@@ -69,6 +71,9 @@ export default function FormMain({
     error,
     isDirty,
     isFormValid,
+    draftStatus,
+    draftError,
+    availableDraft,
 
     // Estados de formularios (compatibilidad completa)
     formEncabezadoHeader,
@@ -108,14 +113,16 @@ export default function FormMain({
     // Acciones
     saveBlog,
     resetForm,
+    restoreDraft,
+    discardDraft,
 
     // Utilidades
     setError,
     clearError,
     setLoading,
-  } = useBlogData(plantillaId, blogId, mode);
+  } = useBlogData(plantillaId, blogId, mode, templateOverride);
 
-  const { registerActions } = useEditionActions();
+  const { registerActions, requestNavigation } = useEditionActions();
 
   const footerDataRef = useRef(formEncabezadoFooter);
 
@@ -140,13 +147,17 @@ export default function FormMain({
   const [selectedPlantilla, setSelectedPlantilla] = useState(plantillaId);
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
 
+  useEffect(() => {
+    setSelectedPlantilla(resolvedPlantillaId);
+  }, [resolvedPlantillaId]);
+
   const [sectionsVisibility, setSectionsVisibility] = useState({
     consejos: formEncabezadoBody?.flag_consejos ?? true,
     galeria: formEncabezadoBody?.flag_galeria ?? true,
     informacion: formEncabezadoBody?.flag_informacion ?? true,
   });
 
-  const currentPlantillaConfig = getPlantillaConfig(plantillaId);
+  const currentPlantillaConfig = getPlantillaConfig(selectedPlantilla);
   const mergedSectionsConfig = currentPlantillaConfig?.sectionsConfig || {
     consejos: { enabled: true },
     galeria: { enabled: true },
@@ -427,7 +438,7 @@ export default function FormMain({
   const handleSave = useCallback(async () => {
     if (!isFormValid) {
       setErrorRef.current("Por favor completa todos los campos obligatorios");
-      return;
+      return false;
     }
 
     try {
@@ -443,8 +454,10 @@ export default function FormMain({
       setTimeout(() => setSaveSuccess(false), 3000);
 
       onSuccessRef.current?.(result);
+      return true;
     } catch (err) {
       setErrorRef.current("No se pudo guardar el blog. Intenta nuevamente.");
+      return false;
     } finally {
       setIsSaving(false);
     }
@@ -456,6 +469,10 @@ export default function FormMain({
       disabled: loading || isSaving || !isFormValid, //  Misma regla en tiempo real que el botón inferior
       loading: isSaving,
       label: isCreateMode ? "Crear Blog" : "Actualizar Blog",
+      isDirty,
+      formLoading: isEditMode && loading,
+      plantillaId: resolvedPlantillaId,
+      clearDraft: discardDraft,
     });
 
     return () => {
@@ -464,6 +481,10 @@ export default function FormMain({
         disabled: true,
         loading: false,
         label: "",
+        isDirty: false,
+        formLoading: false,
+        plantillaId: null,
+        clearDraft: null,
       });
     };
   }, [
@@ -473,18 +494,21 @@ export default function FormMain({
     loading,
     isSaving,
     isFormValid, // Se ejecutará en tiempo real cada vez que cambie la validez
+    isDirty,
+    isEditMode,
+    resolvedPlantillaId,
+    discardDraft,
   ]);
 
   const handleCancel = useCallback(() => {
     if (isDirty) {
-      const confirm = window.confirm(
-        "¿Estás seguro? Los cambios no guardados se perderán.",
-      );
-      if (!confirm) return;
+      requestNavigation("/dashboard/blogs");
+      return;
     }
+
     resetForm();
     onCancel?.();
-  }, [isDirty, resetForm, onCancel]);
+  }, [isDirty, requestNavigation, resetForm, onCancel]);
 
   const handlePreview = useCallback(() => {
     setViewMode((prev) => (prev === "preview" ? "edit" : "preview"));
@@ -735,6 +759,15 @@ export default function FormMain({
                 <span>Cambios sin guardar</span>
               </div>
             )}
+            {isDirty && (
+              <span className="text-xs text-slate-500" aria-live="polite">
+                {draftStatus === "saving"
+                  ? "Guardando borrador local..."
+                  : draftStatus === "saved"
+                    ? "Borrador local guardado"
+                    : null}
+              </span>
+            )}
           </div>
         </div>
 
@@ -753,6 +786,15 @@ export default function FormMain({
           </div>
         )}
 
+        {draftError && (
+          <div
+            role="alert"
+            className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900"
+          >
+            {draftError}
+          </div>
+        )}
+
         {saveSuccess && (
           <div className="mt-4 p-3 bg-green-50 border-l-4 border-green-500 text-green-700">
             <div className="flex items-center">
@@ -762,6 +804,63 @@ export default function FormMain({
           </div>
         )}
       </div>
+
+      {availableDraft && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="recover-blog-draft-title"
+            className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl"
+          >
+            <div className="flex items-center gap-3 bg-slate-800 px-6 py-5 text-white">
+              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-amber-400/15 text-amber-300">
+                <AlertCircle className="h-6 w-6" />
+              </span>
+              <div>
+                <h2
+                  id="recover-blog-draft-title"
+                  className="text-lg font-semibold"
+                >
+                  Se encontró un borrador local
+                </h2>
+                <p className="text-sm text-slate-300">
+                  Guardado{" "}
+                  {new Date(availableDraft.updatedAt).toLocaleString("es")}
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-5 p-6">
+              <p className="text-sm leading-6 text-slate-600">
+                ¿Quieres recuperar los cambios que quedaron en este navegador?
+                El borrador incluye los campos y las imágenes seleccionadas.
+              </p>
+              <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  onClick={() => void discardDraft()}
+                  disabled={draftStatus === "deleting"}
+                  className="min-h-[52px] rounded-xl bg-slate-600 px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50 sm:flex-1"
+                >
+                  Descartar borrador
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!restoreDraft()) {
+                      setError("No se pudo recuperar el borrador local.");
+                    }
+                  }}
+                  className="min-h-[52px] rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-blue-700 sm:flex-1"
+                >
+                  Recuperar borrador
+                </button>
+              </div>
+            </div>
+          </section>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="mb-8 bg-white rounded-lg shadow-sm border">
@@ -846,7 +945,7 @@ export default function FormMain({
               setFileBodyFile1={setFileBodyFile1}
               setFileBodyFile2={setFileBodyFile2}
               servicios={servicios}
-              plantillaId={plantillaId}
+              plantillaId={selectedPlantilla}
               mode={mode}
               isUploading={loading}
               showValidationMessages={true}

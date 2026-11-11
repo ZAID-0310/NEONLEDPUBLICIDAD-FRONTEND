@@ -1,8 +1,13 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { getCookie } from "cookies-next";
 import Api from "../services/api";
 import blogImageService from "../services/blogImageService";
 import blogOrchestrator from "../orchestrators/blogOrchestrator";
+import {
+  deleteBlogDraft,
+  readBlogDraft,
+  writeBlogDraft,
+} from "../services/blogDraftStorage";
 import {
   mapServerToForm,
   mapFormToServer,
@@ -47,16 +52,20 @@ import { safeJsonParse } from "@/lib/safe-json";
 export default function useBlogData(
   plantillaId = PLANTILLA_IDS.CLASICA,
   blogId = null,
-  mode = "create"
+  mode = "create",
+  templateOverride = false
 ) {
-  // ========== CONFIGURACIÓN DINÁMICA ==========
-  const plantillaConfig = getPlantillaConfig(plantillaId);
-
   // ========== ESTADOS BASE ==========
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(mode === "edit" && Boolean(blogId));
   const [error, setError] = useState(null);
   const [isDirty, setIsDirty] = useState(false); // Indica si hay cambios sin guardar
   const [hydrating, setHydrating] = useState(false); // Flag para evitar marcar isDirty durante carga inicial
+  const [resolvedPlantillaId, setResolvedPlantillaId] = useState(plantillaId);
+  const isCreateMode = mode === "create";
+  const isEditMode = mode === "edit";
+  const plantillaConfig = getPlantillaConfig(
+    isEditMode ? resolvedPlantillaId : plantillaId
+  );
 
   const [blogRelations, setBlogRelations] = useState({
     id_blog_head: null,
@@ -98,6 +107,74 @@ export default function useBlogData(
   const [fileFooterFile2, setFileFooterFile2] = useState(null);
   const [fileFooterFile3, setFileFooterFile3] = useState(null);
 
+  const [draftStatus, setDraftStatus] = useState("checking");
+  const [draftError, setDraftError] = useState("");
+  const [availableDraft, setAvailableDraft] = useState(null);
+  const cleanFormSnapshotRef = useRef(null);
+  const hydrationInProgressRef = useRef(false);
+  const resetSnapshotWhenStableRef = useRef(false);
+  const draftCheckedRef = useRef(false);
+  const latestDraftSnapshotRef = useRef(null);
+  const currentDraftData = useMemo(
+    () => ({
+      resolvedPlantillaId,
+      formEncabezadoHeader,
+      formImagenHeader,
+      formEncabezadoBody,
+      formCommendBody,
+      formGaleryBody,
+      formInfoBody,
+      formEncabezadoFooter,
+      formImagenFooter,
+      files: {
+        fileHeader,
+        fileBodyHeader,
+        fileBodyFile1,
+        fileBodyFile2,
+        fileFooterFile1,
+        fileFooterFile2,
+        fileFooterFile3,
+      },
+    }),
+    [
+      resolvedPlantillaId,
+      formEncabezadoHeader,
+      formImagenHeader,
+      formEncabezadoBody,
+      formCommendBody,
+      formGaleryBody,
+      formInfoBody,
+      formEncabezadoFooter,
+      formImagenFooter,
+      fileHeader,
+      fileBodyHeader,
+      fileBodyFile1,
+      fileBodyFile2,
+      fileFooterFile1,
+      fileFooterFile2,
+      fileFooterFile3,
+    ],
+  );
+  const currentFormSnapshot = JSON.stringify({
+    ...currentDraftData,
+    files: Object.values(currentDraftData.files).map((file) =>
+      file
+        ? {
+            name: file.name,
+            size: file.size,
+            lastModified: file.lastModified,
+            type: file.type,
+          }
+        : null
+    ),
+  });
+
+  useEffect(() => {
+    if (isCreateMode || templateOverride) {
+      setResolvedPlantillaId(plantillaId);
+    }
+  }, [isCreateMode, plantillaId, templateOverride]);
+
   // ========== ESTADOS DE VALIDACIÓN ==========
   const [validacionHeader, setValidacionHeader] = useState(false);
   const [validacionBody, setValidacionBody] = useState(false);
@@ -130,8 +207,6 @@ export default function useBlogData(
 
   // ========== COMPUTED VALUES ==========
   const isFormValid = validacionHeader && validacionBody && validacionFooter;
-  const isCreateMode = mode === "create";
-  const isEditMode = mode === "edit";
 
   // ========== FUNCIÓN HELPER PARA OBTENER ID_EMPLEADO ==========
   const getEmpleadoId = useCallback(() => {
@@ -147,6 +222,264 @@ export default function useBlogData(
       return 1; // Fallback por defecto
     }
   }, []);
+
+  const draftOwnerId = useMemo(() => {
+    try {
+      const employee = safeJsonParse(getCookie("empleado"), null);
+      return employee?.id_empleado ? String(employee.id_empleado) : null;
+    } catch {
+      return null;
+    }
+  }, []);
+  const draftKey = draftOwnerId
+    ? `${draftOwnerId}:${isEditMode ? `blog:${blogId}` : "create"}`
+    : null;
+
+  const clearDraft = useCallback(async () => {
+    if (!draftKey) {
+      latestDraftSnapshotRef.current = null;
+      setAvailableDraft(null);
+      return true;
+    }
+
+    setDraftStatus("deleting");
+    try {
+      await deleteBlogDraft(draftKey);
+      latestDraftSnapshotRef.current = null;
+      setAvailableDraft(null);
+      setDraftError("");
+      setDraftStatus("ready");
+      return true;
+    } catch (draftStorageError) {
+      setDraftError(
+        `No se pudo eliminar el borrador local: ${draftStorageError.message}`,
+      );
+      setDraftStatus("error");
+      return false;
+    }
+  }, [draftKey]);
+
+  const restoreDraft = useCallback(() => {
+    if (!availableDraft?.data) return false;
+
+    const {
+      resolvedPlantillaId: draftPlantillaId,
+      formEncabezadoHeader: draftHeader,
+      formImagenHeader: draftHeaderImage,
+      formEncabezadoBody: draftBody,
+      formCommendBody: draftAdvice,
+      formGaleryBody: draftGallery,
+      formInfoBody: draftInfo,
+      formEncabezadoFooter: draftFooter,
+      formImagenFooter: draftFooterImages,
+      files = {},
+    } = availableDraft.data;
+
+    cleanupBlobUrls();
+    if (draftPlantillaId) setResolvedPlantillaId(draftPlantillaId);
+
+    const headerImageUrl = files.fileHeader
+      ? URL.createObjectURL(files.fileHeader)
+      : null;
+    const bodyHeaderImageUrl = files.fileBodyHeader
+      ? URL.createObjectURL(files.fileBodyHeader)
+      : null;
+    const galleryImage2Url = files.fileBodyFile1
+      ? URL.createObjectURL(files.fileBodyFile1)
+      : null;
+    const galleryImage3Url = files.fileBodyFile2
+      ? URL.createObjectURL(files.fileBodyFile2)
+      : null;
+    const footerImage1Url = files.fileFooterFile1
+      ? URL.createObjectURL(files.fileFooterFile1)
+      : null;
+    const footerImage2Url = files.fileFooterFile2
+      ? URL.createObjectURL(files.fileFooterFile2)
+      : null;
+    const footerImage3Url = files.fileFooterFile3
+      ? URL.createObjectURL(files.fileFooterFile3)
+      : null;
+
+    setFormEncabezadoHeader(draftHeader);
+    setFormImagenHeader(
+      headerImageUrl
+        ? { ...draftHeaderImage, public_image: headerImageUrl }
+        : draftHeaderImage,
+    );
+    setFormEncabezadoBody(
+      bodyHeaderImageUrl
+        ? { ...draftBody, public_image1: bodyHeaderImageUrl }
+        : draftBody,
+    );
+    setFormCommendBody(draftAdvice);
+    setFormGaleryBody({
+      ...draftGallery,
+      ...(galleryImage2Url && { public_image2: galleryImage2Url }),
+      ...(galleryImage3Url && { public_image3: galleryImage3Url }),
+    });
+    setFormInfoBody(draftInfo);
+    setFormEncabezadoFooter(draftFooter);
+    setFormImagenFooter({
+      ...draftFooterImages,
+      ...(footerImage1Url && { public_image1: footerImage1Url }),
+      ...(footerImage2Url && { public_image2: footerImage2Url }),
+      ...(footerImage3Url && { public_image3: footerImage3Url }),
+    });
+    setFileHeader(files.fileHeader || null);
+    setFileBodyHeader(files.fileBodyHeader || null);
+    setFileBodyFile1(files.fileBodyFile1 || null);
+    setFileBodyFile2(files.fileBodyFile2 || null);
+    setFileFooterFile1(files.fileFooterFile1 || null);
+    setFileFooterFile2(files.fileFooterFile2 || null);
+    setFileFooterFile3(files.fileFooterFile3 || null);
+    latestDraftSnapshotRef.current = availableDraft.snapshot;
+    setAvailableDraft(null);
+    setDraftError("");
+    setDraftStatus("ready");
+    return true;
+  }, [
+    availableDraft,
+    cleanupBlobUrls,
+    setFormCommendBody,
+    setFormEncabezadoBody,
+    setFormEncabezadoFooter,
+    setFormEncabezadoHeader,
+    setFormGaleryBody,
+    setFormImagenFooter,
+    setFormImagenHeader,
+    setFormInfoBody,
+  ]);
+
+  useEffect(() => {
+    if (draftCheckedRef.current || loading || hydrating) return undefined;
+    draftCheckedRef.current = true;
+    if (!draftKey) {
+      setDraftError(
+        "No se pudo identificar tu sesión; el borrador local no estará disponible.",
+      );
+      setDraftStatus("error");
+      return undefined;
+    }
+
+    let active = true;
+
+    readBlogDraft(draftKey)
+      .then(async (draft) => {
+        if (!active) return;
+        if (!draft || draft.version !== 1 || !draft.data) {
+          setDraftStatus("ready");
+          return;
+        }
+
+        if (draft.snapshot === cleanFormSnapshotRef.current) {
+          await deleteBlogDraft(draftKey);
+          if (active) setDraftStatus("ready");
+          return;
+        }
+
+        latestDraftSnapshotRef.current = draft.snapshot;
+        setAvailableDraft(draft);
+        setDraftStatus("available");
+      })
+      .catch((draftStorageError) => {
+        if (!active) return;
+        setDraftError(
+          `No se pudo revisar el borrador local: ${draftStorageError.message}`,
+        );
+        setDraftStatus("error");
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [draftKey, hydrating, loading]);
+
+  useEffect(() => {
+    if (
+      !isDirty ||
+      loading ||
+      hydrating ||
+      !draftKey ||
+      availableDraft ||
+      (draftStatus !== "ready" && draftStatus !== "saved") ||
+      latestDraftSnapshotRef.current === currentFormSnapshot
+    ) {
+      return undefined;
+    }
+
+    const draft = {
+      key: draftKey,
+      version: 1,
+      snapshot: currentFormSnapshot,
+      updatedAt: Date.now(),
+      data: currentDraftData,
+    };
+    const timer = setTimeout(async () => {
+      setDraftStatus("saving");
+      setDraftError("");
+
+      try {
+        await writeBlogDraft(draft);
+        latestDraftSnapshotRef.current = draft.snapshot;
+        setDraftStatus("saved");
+      } catch (draftStorageError) {
+        setDraftError(
+          `No se pudo guardar el borrador local: ${draftStorageError.message}`,
+        );
+        setDraftStatus("error");
+      }
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [
+    availableDraft,
+    currentDraftData,
+    currentFormSnapshot,
+    draftKey,
+    draftStatus,
+    hydrating,
+    isDirty,
+    loading,
+  ]);
+
+  useEffect(() => {
+    const flushDraft = () => {
+      if (
+        !isDirty ||
+        loading ||
+        hydrating ||
+        !draftKey ||
+        availableDraft ||
+        latestDraftSnapshotRef.current === currentFormSnapshot
+      ) {
+        return;
+      }
+
+      void writeBlogDraft({
+        key: draftKey,
+        version: 1,
+        snapshot: currentFormSnapshot,
+        updatedAt: Date.now(),
+        data: currentDraftData,
+      }).catch((draftStorageError) => {
+        console.error(
+          "No se pudo completar el guardado del borrador al salir:",
+          draftStorageError,
+        );
+      });
+    };
+
+    window.addEventListener("pagehide", flushDraft);
+    return () => window.removeEventListener("pagehide", flushDraft);
+  }, [
+    availableDraft,
+    currentDraftData,
+    currentFormSnapshot,
+    draftKey,
+    hydrating,
+    isDirty,
+    loading,
+  ]);
 
   // ========== FUNCIONES DE CARGA (MODO EDICIÓN) ==========
   const fetchBlogData = useCallback(async () => {
@@ -201,12 +534,16 @@ export default function useBlogData(
         ]);
 
       // Buscar y establecer cardId para poder subir imágenes en modo edición
+      let associatedCard = null;
       if (cardsResponse && Array.isArray(cardsResponse)) {
-        const associatedCard = cardsResponse.find(
-          (card) => card.id_blog == blogId
+        associatedCard = cardsResponse.find(
+          (card) => String(card.id_blog) === String(blogId)
         );
         if (associatedCard) {
           setCardId(associatedCard.id_card);
+          if (!templateOverride && associatedCard.id_plantilla) {
+            setResolvedPlantillaId(Number(associatedCard.id_plantilla));
+          }
         }
       }
 
@@ -233,7 +570,21 @@ export default function useBlogData(
 
       // Mapear body usando mapper centralizado
       if (bodyResponse) {
-        const mappedBody = mapServerToForm("body", bodyResponse, plantillaId);
+        const bodyPlantillaId = templateOverride
+          ? plantillaId
+          : Number(
+              bodyResponse.plantilla_id ||
+                associatedCard?.id_plantilla ||
+                plantillaId
+            );
+        if (!templateOverride && bodyPlantillaId) {
+          setResolvedPlantillaId(bodyPlantillaId);
+        }
+        const mappedBody = mapServerToForm(
+          "body",
+          bodyResponse,
+          bodyPlantillaId
+        );
         if (mappedBody) {
           setFormEncabezadoBody((prev) => ({
             ...prev,
@@ -348,7 +699,7 @@ export default function useBlogData(
       // ✅ Usar setTimeout para desactivar hydrating DESPUÉS de que React procese los cambios de estado
       setTimeout(() => setHydrating(false), 0);
     }
-  }, [blogId, isCreateMode, plantillaId]);
+  }, [blogId, isCreateMode, plantillaId, templateOverride]);
 
   // Cargar datos al montar o cambiar blogId
   useEffect(() => {
@@ -528,7 +879,10 @@ export default function useBlogData(
           formCommendBody?.texto5;
 
         if (hasConsejos) {
-          const consejosPayload = mapConsejos(formCommendBody, plantillaId);
+          const consejosPayload = mapConsejos(
+            formCommendBody,
+            resolvedPlantillaId
+          );
 
           // Garantizar que tenga título
           if (!consejosPayload.titulo || consejosPayload.titulo.trim() === "") {
@@ -573,7 +927,7 @@ export default function useBlogData(
           public_image3: formGaleryBody.public_image3?.startsWith("blob:")
             ? DEFAULT_IMAGES.body.image3
             : formGaleryBody.public_image3,
-          plantilla_id: plantillaId,
+          plantilla_id: resolvedPlantillaId,
           ...(commendTarjetaId && { id_commend_tarjeta: commendTarjetaId }),
         };
 
@@ -674,6 +1028,7 @@ export default function useBlogData(
     fileBodyFile1,
     fileBodyFile2,
     plantillaId,
+    resolvedPlantillaId,
     isCreateMode,
     blogRelations.id_blog_body,
   ]);
@@ -801,6 +1156,8 @@ export default function useBlogData(
         setFileFooterFile1(null);
         setFileFooterFile2(null);
         setFileFooterFile3(null);
+        await clearDraft();
+        resetSnapshotWhenStableRef.current = true;
         setIsDirty(false);
 
         return result;
@@ -835,7 +1192,7 @@ export default function useBlogData(
             fileFooterFile2,
             fileFooterFile3,
           },
-          plantillaId,
+          plantillaId: resolvedPlantillaId,
           empleadoId: getEmpleadoId(),
           cardId,
           blogRelations,
@@ -849,6 +1206,8 @@ export default function useBlogData(
         setFileFooterFile1(null);
         setFileFooterFile2(null);
         setFileFooterFile3(null);
+        await clearDraft();
+        resetSnapshotWhenStableRef.current = true;
         setIsDirty(false);
 
         return result;
@@ -877,6 +1236,7 @@ export default function useBlogData(
     fileFooterFile2,
     fileFooterFile3,
     plantillaId,
+    resolvedPlantillaId,
     isCreateMode,
     blogId,
     saveHeader,
@@ -884,6 +1244,7 @@ export default function useBlogData(
     saveFooter,
     saveCard,
     getEmpleadoId,
+    clearDraft,
     blogRelations,
     cardId,
   ]);
@@ -892,6 +1253,7 @@ export default function useBlogData(
   const resetForm = useCallback(() => {
     cleanupBlobUrls();
     resetAllForms();
+    void clearDraft();
 
     setFileHeader(null);
     setFileBodyHeader(null);
@@ -900,6 +1262,7 @@ export default function useBlogData(
     setFileFooterFile1(null);
     setFileFooterFile2(null);
     setFileFooterFile3(null);
+    resetSnapshotWhenStableRef.current = true;
 
     setValidacionHeader(false);
     setValidacionBody(false);
@@ -914,25 +1277,33 @@ export default function useBlogData(
       id_blog_body: null,
       id_blog_footer: null,
     });
-  }, [cleanupBlobUrls, resetAllForms]);
+  }, [clearDraft, cleanupBlobUrls, resetAllForms]);
 
-  // Marcar como modificado cuando cambien los datos
+  // Compare changes against the last loaded or saved form state.
   useEffect(() => {
-    if (!loading && !hydrating) {
-      setIsDirty(true);
+    if (hydrating) {
+      hydrationInProgressRef.current = true;
+      return;
     }
-  }, [
-    formEncabezadoHeader,
-    formImagenHeader,
-    formEncabezadoBody,
-    formCommendBody,
-    formGaleryBody,
-    formInfoBody,
-    formEncabezadoFooter,
-    formImagenFooter,
-    loading,
-    hydrating,
-  ]);
+
+    if (loading) return;
+
+    if (
+      cleanFormSnapshotRef.current === null ||
+      hydrationInProgressRef.current ||
+      resetSnapshotWhenStableRef.current
+    ) {
+      cleanFormSnapshotRef.current = currentFormSnapshot;
+      hydrationInProgressRef.current = false;
+      resetSnapshotWhenStableRef.current = false;
+      setIsDirty(false);
+      return;
+    }
+
+    if (draftStatus === "checking" || draftStatus === "available") return;
+
+    setIsDirty(currentFormSnapshot !== cleanFormSnapshotRef.current);
+  }, [currentFormSnapshot, draftStatus, loading, hydrating]);
 
   // ========== LIMPIEZA DE MEMORY LEAKS ==========
   // Limpiar URLs blob al desmontar para evitar memory leaks
@@ -947,6 +1318,7 @@ export default function useBlogData(
     // ===== CONFIGURACIÓN =====
     plantillaConfig,
     plantillaId,
+    resolvedPlantillaId,
     mode,
     isCreateMode,
     isEditMode,
@@ -956,6 +1328,9 @@ export default function useBlogData(
     error,
     isDirty,
     isFormValid,
+    draftStatus,
+    draftError,
+    availableDraft,
 
     // ===== IDs DE RELACIONES =====
     blogRelations,
@@ -1013,6 +1388,8 @@ export default function useBlogData(
     saveCard,
     saveBlog,
     resetForm,
+    restoreDraft,
+    discardDraft: clearDraft,
 
     // ===== FUNCIONES HELPER =====
     getEmpleadoId,

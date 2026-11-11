@@ -73,3 +73,15 @@ export const createProducto = async (productoData) => {
 
   return await fetchApi("/productos", "POST", payload);
 };
+
+export const updateProducto = async (id, productoData) => {
+  const id_empleado = getEmpleadoId();
+  const payload = {
+    nombre: productoData.nombre,
+    descripcion: productoData.descripcion,
+    ...(productoData.estado !== undefined ? { estado: productoData.estado } : {}),
+    ...(id_empleado ? { id_empleado } : {}),
+  };
+
+  return await fetchApi(`/productos/${id}`, "PUT", payload);
+};
