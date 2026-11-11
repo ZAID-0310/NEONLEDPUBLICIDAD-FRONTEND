@@ -205,13 +205,13 @@ export default function Footer() {
                 COLUMNA 1: Marca & Contacto Rápido
                 ----------------------------------------- */}
             <div className="flex flex-col items-start gap-4">
-              <Link href="/" className="inline-block">
+              <Link href="/" className="inline-block group">
                 <img
-                  src="/header_footer/Logo.oficial.Neon.Led.Publicidad.webp"
+                  src="/header_footer/logo_vertical_neon_led_publicidad.webp"
                   alt="Logo Neon Led Publicidad"
-                  width="213"
-                  height="75"
-                  className="w-[190px] h-auto"
+                  width="799"
+                  height="415"
+                  className="w-[155px] h-auto object-contain transition-transform duration-200 group-hover:scale-105"
                 />
               </Link>
 
