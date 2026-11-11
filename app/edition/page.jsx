@@ -17,6 +17,7 @@ import { PLANTILLA_IDS, getPlantillaConfig } from "./config/index";
 function EditionContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const paramTemplate = searchParams.get("template");
   
   // Estados principales
   const [currentView, setCurrentView] = useState("loading"); // 'loading' | 'template-select' | 'form' | 'error'
@@ -31,8 +32,8 @@ function EditionContent() {
   // Leer query params al montar componente
   useEffect(() => {
     const paramMode = searchParams.get("mode") || "create";
-    const paramTemplate = searchParams.get("template");
     const paramId = searchParams.get("id") || searchParams.get("id_blog");
+    const paramView = searchParams.get("view");
 
     setMode(paramMode);
 
@@ -46,7 +47,15 @@ function EditionContent() {
       }
       
       setBlogId(paramId);
-      setCurrentView("form");
+      if (
+        paramTemplate &&
+        Object.values(PLANTILLA_IDS).includes(Number(paramTemplate))
+      ) {
+        setSelectedTemplate(Number(paramTemplate));
+      } else {
+        setSelectedTemplate(null);
+      }
+      setCurrentView(paramView === "templates" ? "template-select" : "form");
       setLoading(false);
       
     } else {
@@ -64,6 +73,7 @@ function EditionContent() {
           setCurrentView("error");
         }
       } else {
+        setSelectedTemplate(null);
         // Sin plantilla especificada, mostrar selector
         setCurrentView("template-select");
       }
@@ -80,11 +90,22 @@ function EditionContent() {
     // Actualizar URL para reflejar selección
     const newUrl = new URL(window.location);
     newUrl.searchParams.set("template", templateId);
+    newUrl.searchParams.delete("view");
     router.replace(newUrl.pathname + newUrl.search, { scroll: false });
   };
 
   // Handler para cancelar selección de plantilla
   const handleTemplateCancel = () => {
+    if (mode === "edit" && blogId) {
+      const selectedTemplateParam = paramTemplate
+        ? `&template=${encodeURIComponent(paramTemplate)}`
+        : "";
+      router.replace(
+        `/edition?mode=edit&id=${encodeURIComponent(blogId)}${selectedTemplateParam}`,
+      );
+      return;
+    }
+
     router.push("/dashboard/blogs");
   };
 
@@ -145,7 +166,7 @@ function EditionContent() {
       <TemplateSelector
         onTemplateSelect={handleTemplateSelect}
         onCancel={handleTemplateCancel}
-        defaultTemplate={PLANTILLA_IDS.CLASICA}
+        defaultTemplate={selectedTemplate || PLANTILLA_IDS.CLASICA}
         showCancel={true}
       />
     );
@@ -155,9 +176,11 @@ function EditionContent() {
     return (
       <div className="min-h-screen bg-gray-50">
         <FormMain
+          key={`${mode}:${blogId ?? "new"}`}
           plantillaId={selectedTemplate || PLANTILLA_IDS.CLASICA}
           blogId={blogId}
           mode={mode}
+          templateOverride={Boolean(paramTemplate)}
           onSuccess={handleFormSuccess}
           onCancel={handleFormCancel}
           onPlantillaChange={mode === "create" ? handlePlantillaChange : undefined}
