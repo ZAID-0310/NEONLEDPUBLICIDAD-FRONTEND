@@ -15,8 +15,8 @@ export default function Footer() {
                 Rotulación y Letreros Luminosos
               </h3>
               <ul className="flex flex-col gap-3 text-sm text-gray-300">
-                <li className="flex items-start gap-2">
-                  <span className="text-[#48A8FF] mt-1">•</span>{" "}
+                <li className="flex items-center gap-2">
+                 <span className="text-[#48A8FF]">•</span>
                   <Link
                     href="/productos/letras-acrilico"
                     className="hover:text-[#48A8FF] transition-colors"
