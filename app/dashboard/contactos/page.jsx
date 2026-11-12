@@ -560,7 +560,7 @@ const paginatedData = filteredData.slice(
             </div>
 
             {/* Tabla para desktop (hidden en móvil, block en desktop) */}
-            <div className="hidden md:block overflow-x-auto">
+            <div className="hidden md:block overflow-x-auto rounded-lg bg-white shadow-sm dark:bg-gray-800">
               <table className="w-full">
                 <thead className="bg-blue-600 text-white">
                   <tr>

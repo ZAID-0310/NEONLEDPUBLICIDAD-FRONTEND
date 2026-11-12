@@ -17,6 +17,7 @@ import {
   Phone,
   User,
   BadgeCheck,
+  X,
 } from "lucide-react";
 
 import Pagination from "../components/Pagination";
@@ -380,8 +381,8 @@ export default function Page() {
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-7xl">
-      <Card className="border-none shadow-md">
-        <CardHeader className="bg-gradient-to-r from-[rgb(17,87,211)] to-[rgb(14,70,170)] text-white rounded-t-lg pb-6">
+      <Card className="overflow-hidden rounded-xl border-none shadow-md">
+        <CardHeader className="bg-blue-600 text-white rounded-t-lg pb-6">
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
             <div>
               <CardTitle className="text-2xl font-bold flex items-center gap-2">
@@ -411,28 +412,31 @@ export default function Page() {
           {/* Filtros y controles */}
           <div className="mb-6 space-y-4">
             <div className="flex flex-col sm:flex-row gap-3 justify-between items-center">
-              <div className="relative w-full sm:w-64">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  type="text"
-                  placeholder="Buscar empleado..."
-                  className="pl-9 w-full"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
+              <div className="w-full sm:w-64">
+                <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  BUSCAR
+                </label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    type="text"
+                    placeholder="Buscar empleado..."
+                    className="w-full bg-white pl-9 dark:border-gray-600 dark:bg-gray-800 dark:text-white focus-visible:ring-gray-400 dark:focus-visible:ring-gray-500"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
               </div>
 
               <Button
-                variant="outline"
-                size="sm"
                 onClick={fetchEmpleados}
                 disabled={isLoading}
-                className="w-full sm:w-auto"
+                className="flex w-full items-center gap-2 bg-blue-600 hover:bg-blue-700 sm:w-auto"
               >
                 <RefreshCw
-                  className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
+                  className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
                 />
-                {isLoading ? "Cargando..." : "Actualizar"}
+                Actualizar
               </Button>
             </div>
 
@@ -461,9 +465,11 @@ export default function Page() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setSelectedRole("all")}
-                  className="h-8 px-2 text-xs"
+                  className="h-8 w-8 p-0 text-gray-500 hover:bg-gray-200 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white"
+                  aria-label="Limpiar filtro de rol"
+                  title="Limpiar filtro"
                 >
-                  Limpiar filtro
+                  <X className="h-4 w-4" />
                 </Button>
               )}
 
@@ -502,7 +508,7 @@ export default function Page() {
               </div>
 
               {/* Tabla para desktop */}
-              <div className="hidden md:block rounded-lg border overflow-hidden">
+              <div className="hidden md:block">
                 {auth_service.hasPermission("ver-empleados") && (
                   <Table
                     headers={headers}
