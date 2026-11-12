@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import RouteGuard from "@/app/dashboard/components/RouteGuard";
 import { useDebounce } from "@/hooks/useDebounce";
 import Swal from "sweetalert2";
 import axios from "axios";
@@ -54,24 +55,7 @@ export default function Page() {
   const { isAuthenticated, user, hasPermission } = useAuth();
 
   const router = useRouter();
-
-  useEffect(() => {
-    if (user === null) return; // Espera a que se cargue el usuario
-
-    if (!hasPermission("ver-blogs")) {
-      Swal.fire({
-        title: "Acceso denegado",
-        text: "No tienes permisos para ver esta sección",
-        icon: "error",
-        confirmButtonText: "Aceptar",
-      }).then(() => {
-        router.replace("/dashboard/main");
-      });
-    } else {
-      fetchData(); // Solo ejecuta si tiene permiso
-    }
-  }, [user]);
-
+  
   useEffect(() => {
     filterBlogs();
   }, [activeFilter, debouncedSearchQuery, allBlogs, myBlogs]);
@@ -334,6 +318,7 @@ export default function Page() {
 
   const [mostrarHistorial, setMostrarHistorial] = useState(false);
   return (
+    <RouteGuard>
     <main className="p-6 flex flex-col w-full max-h-svh bg-slate-50 dark:bg-slate-900">
       <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-6 mb-6">
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
@@ -756,5 +741,6 @@ export default function Page() {
         </div>
       )}
     </main>
+    </RouteGuard>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import RouteGuard from "@/app/dashboard/components/RouteGuard";
 import Swal from "sweetalert2";
 import {
   Star,
@@ -30,6 +31,7 @@ function StarRatingInput({ value, onChange }) {
   const [hover, setHover] = useState(0);
 
   return (
+    
     <div className="flex items-center gap-1">
       {[1, 2, 3, 4, 5].map((n) => {
         const active = (hover || value) >= n;
@@ -616,6 +618,7 @@ export default function TestimoniosPage() {
   };
 
   return (
+    <RouteGuard>
     <main className="flex h-[100vh] w-full flex-1 flex-col overflow-y-auto bg-gray-50 p-4 dark:bg-gray-900 md:p-6">
       {/* Header */}
       <div className="mb-6 rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
@@ -722,5 +725,6 @@ export default function TestimoniosPage() {
         />
       )}
     </main>
+     </RouteGuard>
   );
 }

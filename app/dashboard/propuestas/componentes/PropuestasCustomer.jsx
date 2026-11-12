@@ -3,6 +3,7 @@
 import { BookText, Search, RefreshCw, Plus, Eye, Edit, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import RouteGuard from "@/app/dashboard/components/RouteGuard";
 import { proposalApi, customerApi } from "../Services/PropuestasConexion";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
@@ -166,6 +167,7 @@ const PropuestasCustomer = () => {
   }, []);
 
   return (
+    <RouteGuard>
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-3 sm:p-6 lg:p-8">
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-2 sm:px-6 py-4">
         {/* Header */}
@@ -538,7 +540,9 @@ const PropuestasCustomer = () => {
         />
       )}
     </div>
+    </RouteGuard>
   );
 };
+
 
 export default PropuestasCustomer;

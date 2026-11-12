@@ -28,7 +28,7 @@ export default function Header() {
   const [currentMenu, setCurrentMenu] = useState("main");
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout, user } = useAuth();
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
@@ -57,18 +57,20 @@ export default function Header() {
 
   // Filtrado de los links segun permisos y roles del usuario
   const filterLinks = dashboardLinks.filter((item) => {
-    const hasPermission =
-      !item.permission || auth_service.hasPermission(item.permission);
+  const currentRole = user?.rol?.toLowerCase();   
 
-    let hasRole = true;
-    if (item.roles && item.roles.length > 0) {
-      hasRole = item.roles.some((rolPermitido) =>
-        auth_service.hasRole(rolPermitido),
-      );
-    }
+  const hasPermission =
+    !item.permission || auth_service.hasPermission(item.permission);
 
-    return hasPermission && hasRole;
-  });
+  let hasRole = true;
+  if (item.roles && item.roles.length > 0) {
+    hasRole = item.roles.some(
+      (rolPermitido) => rolPermitido.toLowerCase() === currentRole,
+    );
+  }
+
+  return hasPermission && hasRole;
+});
 
   useEffect(() => {
     const savedMenuState = localStorage.getItem("menuActive");
