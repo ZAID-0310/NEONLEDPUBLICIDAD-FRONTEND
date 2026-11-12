@@ -166,13 +166,11 @@ const PropuestasCustomer = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-3 sm:p-6 lg:p-8">
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-2 sm:px-6 py-4">
+    <div className="bg-gray-100 p-3 dark:bg-gray-900 sm:p-4 md:p-6 lg:p-8">
+      <div className="mx-auto max-w-[1400px] overflow-hidden rounded-2xl shadow-lg">
         {/* Header */}
-
-        <div className="bg-blue-600 rounded-lg p-4 sm:p-6 mb-6 text-white shadow-md">
+        <div className="bg-blue-600 rounded-t-2xl px-4 sm:px-6 md:px-8 py-4 sm:py-6 text-white">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            {/* Título y Descripción */}
             <div className="min-w-0">
               <h1 className="text-xl sm:text-2xl font-bold flex items-center gap-2 text-white">
                 <BookText size={24} className="shrink-0" />
@@ -183,7 +181,6 @@ const PropuestasCustomer = () => {
               </p>
             </div>
 
-            {/* Botón "+ Nueva Propuesta" */}
             <Link
               href="/dashboard/propuestas/crear"
               className="w-full sm:w-auto bg-white text-blue-600 px-4 py-2.5 rounded-lg font-medium hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 text-sm shrink-0 shadow-sm"
@@ -194,42 +191,14 @@ const PropuestasCustomer = () => {
           </div>
         </div>
 
-        {/* Filtros */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-sm">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">
-                BUSCAR POR NOMBRE
-              </label>
-              <div className="relative">
-                <Search
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                  size={16}
-                />
-                <input
-                  type="text"
-                  placeholder="Nombre de la propuesta"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:outline-none bg-white dark:bg-gray-700 dark:text-white"
-                />
-                {searchTerm && (
-                  <button
-                    type="button"
-                    onClick={() => setSearchTerm("")}
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    <X size={16} />
-                  </button>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">
-                BUSCAR POR CLIENTE
-              </label>
-              <div className="relative">
+        <div className="bg-gray-200 dark:bg-gray-800 rounded-b-2xl p-4 sm:p-6 md:p-8">
+          {/* Filtros */}
+          <div className="mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">
+                  BUSCAR POR NOMBRE
+                </label>
                 <div className="relative">
                   <Search
                     className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -237,80 +206,109 @@ const PropuestasCustomer = () => {
                   />
                   <input
                     type="text"
-                    placeholder="Buscar por nombre de cliente o email"
-                    value={customerSearchTerm}
-                    onChange={(e) => {
-                      setCustomerSearchTerm(e.target.value);
-                      setShowCustomerDropdown(true);
-                    }}
-                    onFocus={() => setShowCustomerDropdown(true)}
-                    onBlur={() =>
-                      setTimeout(() => setShowCustomerDropdown(false), 200)
-                    }
-                    className="w-full pl-10 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:outline-none bg-white dark:bg-gray-700 dark:text-white"
+                    placeholder="Nombre de la propuesta"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:outline-none bg-white dark:bg-gray-700 dark:text-white"
                   />
-                  {customerSearchTerm && (
+                  {searchTerm && (
                     <button
                       type="button"
-                      onClick={clearCustomerSelection}
+                      onClick={() => setSearchTerm("")}
                       className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                     >
                       <X size={16} />
                     </button>
                   )}
                 </div>
-                {showCustomerDropdown && filteredCustomers.length > 0 && (
-                  <ul className="absolute z-10 w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto mt-1">
-                    {filteredCustomers.map((cliente) => (
-                      <li
-                        key={cliente.id}
-                        onMouseDown={() => handleCustomerSelect(cliente)}
-                        className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer dark:text-white"
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">
+                  BUSCAR POR CLIENTE
+                </label>
+                <div className="relative">
+                  <div className="relative">
+                    <Search
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      size={16}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Buscar por nombre de cliente o email"
+                      value={customerSearchTerm}
+                      onChange={(e) => {
+                        setCustomerSearchTerm(e.target.value);
+                        setShowCustomerDropdown(true);
+                      }}
+                      onFocus={() => setShowCustomerDropdown(true)}
+                      onBlur={() =>
+                        setTimeout(() => setShowCustomerDropdown(false), 200)
+                      }
+                      className="w-full pl-10 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:outline-none bg-white dark:bg-gray-700 dark:text-white"
+                    />
+                    {customerSearchTerm && (
+                      <button
+                        type="button"
+                        onClick={clearCustomerSelection}
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                       >
-                        <div className="font-medium">
-                          {cliente.nombre} {cliente.apellido}
-                        </div>
-                        <div className="text-sm text-gray-600 dark:text-gray-300">
-                          {cliente.email}
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
+                        <X size={16} />
+                      </button>
+                    )}
+                  </div>
+                  {showCustomerDropdown && filteredCustomers.length > 0 && (
+                    <ul className="absolute z-10 w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto mt-1">
+                      {filteredCustomers.map((cliente) => (
+                        <li
+                          key={cliente.id}
+                          onMouseDown={() => handleCustomerSelect(cliente)}
+                          className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer dark:text-white"
+                        >
+                          <div className="font-medium">
+                            {cliente.nombre} {cliente.apellido}
+                          </div>
+                          <div className="text-sm text-gray-600 dark:text-gray-300">
+                            {cliente.email}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">
+                  FECHA
+                </label>
+                <input
+                  type="date"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:outline-none bg-white dark:bg-gray-700 dark:text-white dark:[color-scheme:dark]"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                />
+              </div>
+
+              <div className="flex items-end justify-end">
+                <button
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-50"
+                  onClick={() => loadData()}
+                  disabled={loading}
+                >
+                  <RefreshCw
+                    size={16}
+                    className={loading ? "animate-spin" : ""}
+                  />
+                  Actualizar
+                </button>
               </div>
             </div>
-
-            <div>
-              <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">
-                FECHA
-              </label>
-              <input
-                type="date"
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:outline-none bg-white dark:bg-gray-700 dark:text-white"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-              />
-            </div>
-
-            <div className="flex justify-end items-center">
-              <button
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-50"
-                onClick={() => loadData()}
-                disabled={loading}
-              >
-                <RefreshCw
-                  size={16}
-                  className={loading ? "animate-spin" : ""}
-                />
-                Actualizar
-              </button>
-            </div>
           </div>
-        </div>
 
-        {/* Tabla */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden w-full">
-          {loading ? (
+          {/* Tabla */}
+          <div className="w-full min-w-0 max-w-full overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
+            {loading ? (
             <div className="flex justify-center items-center p-8">
               <RefreshCw className="animate-spin text-blue-600" size={24} />
             </div>
@@ -413,8 +411,8 @@ const PropuestasCustomer = () => {
               </div>
 
               {/* VISTA ESCRITORIO (TABLA TRADICIONAL*/}
-              <div className="hidden md:block overflow-x-auto">
-                <table className="w-full">
+              <div className="hidden md:block w-full min-w-0 max-w-full overflow-x-auto">
+                <table className="w-full min-w-[760px]">
                   <thead className="bg-blue-600 text-white">
                     <tr>
                       <th className="px-6 py-4 text-center font-medium w-[30%]">
@@ -529,6 +527,7 @@ const PropuestasCustomer = () => {
             </div>
           )}
         </div>
+      </div>
       </div>
       {notification && (
         <NotificacionesPropuesta
