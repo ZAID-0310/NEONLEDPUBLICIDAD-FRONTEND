@@ -12,11 +12,16 @@ import {
   User,
   Calendar,
   FileText,
+  Pencil,
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { getProductos, createProducto } from "../service/ProductoConexion";
+import {
+  getProductos,
+  createProducto,
+  updateProducto,
+} from "../service/ProductoConexion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -47,8 +52,8 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 // Cálculo dinámico de items según la altura de la ventana
 const calculateDynamicPerPage = () => {
   if (typeof window === "undefined") return 6;
-  const reservedHeight = 380; // Espacio de cabeceras, buscador y paginación
-  const rowHeight = 68; // Altura promedio de cada fila
+  const reservedHeight = 380;
+  const rowHeight = 68;
   const available = window.innerHeight - reservedHeight;
   const calculated = Math.floor(available / rowHeight);
   return Math.max(4, Math.min(15, calculated));
@@ -90,7 +95,7 @@ const productoSchema = z.object({
     .max(1000, "La descripción no puede exceder los 1000 caracteres"),
 });
 
-// Notificación flotante idéntica a Clientes
+// Notificación flotante
 const AlertNotification = ({ alert, onClose }) => {
   if (!alert.show) return null;
 
@@ -122,7 +127,13 @@ const AlertNotification = ({ alert, onClose }) => {
             )}
           </div>
           <div className="flex-1">
-            <AlertTitle>{isError ? "Error" : "Producto creado"}</AlertTitle>
+            <AlertTitle>
+              {isError
+                ? "Error"
+                : alert.type === "update"
+                  ? "Producto actualizado"
+                  : "Producto creado"}
+            </AlertTitle>
             <AlertDescription>{alert.message}</AlertDescription>
           </div>
         </div>
@@ -131,16 +142,31 @@ const AlertNotification = ({ alert, onClose }) => {
   );
 };
 
+// Badge de estado
+const EstadoBadge = ({ estado }) =>
+  estado == 1 ? (
+    <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs md:text-sm font-semibold bg-emerald-500/20 border bg-green-100 text-green-800 backdrop-blur-sm">
+      Activo
+    </span>
+  ) : (
+    <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs md:text-sm font-semibold bg-rose-500/20  border bg-yellow-100 text-yellow-800 backdrop-blur-sm">
+      Inactivo
+    </span>
+  );
+
 // Card para vista móvil
-const ProductoCard = ({ producto }) => (
+const ProductoCard = ({ producto, onEdit }) => (
   <div className="bg-white rounded-lg shadow-md p-4 mb-3 border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
     <div className="flex items-center gap-2 mb-3">
       <div className="bg-blue-100 rounded-full p-2 dark:bg-blue-900">
         <Package size={16} className="text-blue-600 dark:text-blue-300" />
       </div>
       <span className="font-bold text-gray-900 dark:text-white">
-        {producto.nombre}
+        # {producto.id} - {producto.nombre}
       </span>
+      <div className="accordion ml-auto">
+        <EstadoBadge estado={producto.estado} />
+      </div>
     </div>
 
     <div className="space-y-2 text-sm">
@@ -163,31 +189,45 @@ const ProductoCard = ({ producto }) => (
         </span>
       </div>
     </div>
+
+    <Button
+      size="sm"
+      onClick={() => onEdit(producto)}
+      className="mt-3 w-full bg-blue-600 hover:bg-blue-700"
+    >
+      <Pencil size={14} className="mr-1" /> Editar
+    </Button>
   </div>
 );
 
 // Tabla para Desktop
-const ProductoTable = ({ productos, searchTerm }) => (
+const ProductoTable = ({ productos, searchTerm, onEdit }) => (
   <Table>
     <TableHeader className="bg-blue-600">
       <TableRow className="hover:bg-blue-600">
-        {["id", "Nombre", "Descripción", "Creado por", "Fecha de Creación"].map(
-          (header) => (
-            <TableHead
-              key={header}
-              className="text-white text-center font-medium px-6 py-5"
-            >
-              {header}
-            </TableHead>
-          ),
-        )}
+        {[
+          "id",
+          "Nombre",
+          "Descripción",
+          "Creado por",
+          "Fecha de Creación",
+          "Estado",
+          "Acciones",
+        ].map((header) => (
+          <TableHead
+            key={header}
+            className="text-white text-center font-medium px-6 py-5"
+          >
+            {header}
+          </TableHead>
+        ))}
       </TableRow>
     </TableHeader>
-    <TableBody className="divide-y divide-gray-200 dark:divide-gray-700">
+    <TableBody className="divide-y divide-gray-200 dark:divide-gray-700 text-center">
       {productos.length === 0 ? (
         <TableRow>
           <TableCell
-            colSpan={5}
+            colSpan={7}
             className="px-6 py-8 text-center text-gray-500 dark:text-gray-400"
           >
             {searchTerm
@@ -222,6 +262,18 @@ const ProductoTable = ({ productos, searchTerm }) => (
             <TableCell className="px-6 py-5 text-gray-900 text-center whitespace-nowrap dark:text-white">
               {producto.fechaCreacion}
             </TableCell>
+            <TableCell className="px-6 py-5 text-gray-900 text-center whitespace-nowrap dark:text-white">
+              <EstadoBadge estado={producto.estado} />
+            </TableCell>
+            <TableCell className="px-6 py-5">
+              <Button
+                size="sm"
+                onClick={() => onEdit(producto)}
+                className="bg-blue-600 hover:bg-blue-700 flex items-center gap-1 mx-auto"
+              >
+                <Pencil size={14} /> 
+              </Button>
+            </TableCell>
           </TableRow>
         ))
       )}
@@ -229,7 +281,7 @@ const ProductoTable = ({ productos, searchTerm }) => (
   </Table>
 );
 
-// Paginación idéntica a Clientes
+// Paginación
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   const maxVisiblePages = 5;
   let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
@@ -279,16 +331,26 @@ const PageButton = ({ onClick, disabled, active, label }) => (
   </button>
 );
 
-// Modal para Crear Producto
-const CreateProductoModal = ({ form, show, onClose, onSubmit, isLoading }) => (
+// Modal reutilizable (crear / editar)
+const ProductoFormModal = ({
+  form,
+  show,
+  onClose,
+  onSubmit,
+  isLoading,
+  title = "Nuevo Producto",
+  description = "Ingresa el nombre y la descripción para registrar el nuevo producto.",
+  submitText = "Crear Producto",
+  loadingText = "Creando...",
+}) => (
   <Dialog open={show} onOpenChange={onClose}>
     <DialogContent className="sm:max-w-lg bg-white dark:bg-gray-900 max-h-[90vh] overflow-y-auto">
       <DialogHeader>
         <DialogTitle className="text-gray-900 dark:text-white">
-          Nuevo Producto
+          {title}
         </DialogTitle>
         <DialogDescription className="text-gray-600 dark:text-gray-300">
-          Ingresa el nombre y la descripción para registrar el nuevo producto.
+          {description}
         </DialogDescription>
       </DialogHeader>
 
@@ -341,7 +403,7 @@ const CreateProductoModal = ({ form, show, onClose, onSubmit, isLoading }) => (
               className="flex-1 bg-blue-600 hover:bg-blue-700 flex items-center justify-center"
               disabled={isLoading}
             >
-              {isLoading ? "Creando..." : "Crear Producto"}
+              {isLoading ? loadingText : submitText}
             </Button>
             <Button
               type="button"
@@ -364,10 +426,13 @@ export default function Productos() {
     productos: [],
     searchTerm: "",
     showCreateModal: false,
+    showEditModal: false,
+    editingProducto: null,
     isRefreshing: true,
     currentPage: 1,
     totalPages: 1,
     isCreating: false,
+    isUpdating: false,
   });
 
   const [alert, setAlert] = useState({
@@ -379,10 +444,13 @@ export default function Productos() {
   const createForm = useForm({
     resolver: zodResolver(productoSchema),
     mode: "onBlur",
-    defaultValues: {
-      nombre: "",
-      descripcion: "",
-    },
+    defaultValues: { nombre: "", descripcion: "" },
+  });
+
+  const editForm = useForm({
+    resolver: zodResolver(productoSchema),
+    mode: "onBlur",
+    defaultValues: { nombre: "", descripcion: "" },
   });
 
   const showAlert = (type, message) => {
@@ -404,6 +472,7 @@ export default function Productos() {
             descripcion: p.descripcion,
             empleadoNombre: getEmpleadoNombre(p.empleado),
             fechaCreacion: formatDate(p.created_at),
+            estado: p.estado,
           })),
           totalPages: response.lastPage || 1,
           currentPage: response.currentPage || page,
@@ -423,7 +492,7 @@ export default function Productos() {
     [perPage, state.searchTerm],
   );
 
-  // Recalcular filas dinámicamente al redimensionar ventana (con debounce de 400ms)
+  // Recalcular filas al redimensionar ventana
   useEffect(() => {
     let timeoutId = null;
     const handleResize = () => {
@@ -441,7 +510,7 @@ export default function Productos() {
     };
   }, []);
 
-  // Cargar productos cuando cambia la búsqueda o el tamaño de página calculado
+  // Cargar productos cuando cambia la búsqueda o el tamaño de página
   useEffect(() => {
     const debounceSearch = setTimeout(() => {
       loadProductos(1, perPage, state.searchTerm);
@@ -472,6 +541,47 @@ export default function Productos() {
       }
     } finally {
       setState((prev) => ({ ...prev, isCreating: false }));
+    }
+  };
+
+  const handleOpenEdit = (producto) => {
+    editForm.reset({
+      nombre: producto.nombre,
+      descripcion: producto.descripcion,
+    });
+    setState((prev) => ({
+      ...prev,
+      showEditModal: true,
+      editingProducto: producto,
+    }));
+  };
+
+  const handleEditSubmit = async (formData) => {
+    try {
+      setState((prev) => ({ ...prev, isUpdating: true }));
+      await updateProducto(state.editingProducto.id, {
+        ...formData,
+        estado: state.editingProducto.estado,
+      });
+      showAlert("update", "El producto ha sido actualizado exitosamente.");
+      setState((prev) => ({
+        ...prev,
+        showEditModal: false,
+        editingProducto: null,
+      }));
+      await loadProductos(state.currentPage, perPage, state.searchTerm);
+    } catch (error) {
+      if (error.errors) {
+        Object.entries(error.errors).forEach(([field, messages]) => {
+          if (messages?.[0]) {
+            editForm.setError(field, { type: "server", message: messages[0] });
+          }
+        });
+      } else {
+        showAlert("error", error.message || "No se pudo actualizar el producto");
+      }
+    } finally {
+      setState((prev) => ({ ...prev, isUpdating: false }));
     }
   };
 
@@ -508,7 +618,7 @@ export default function Productos() {
         </div>
 
         {/* Contenedor Principal */}
-        <div className="bg-gray-200 dark:bg-gray-800 rounded-b-2xl p-4 sm:p-6 md:p-8 shadow-lg">
+        <div className="bg-white dark:bg-gray-800 rounded-b-2xl p-4 sm:p-6 md:p-8 shadow-lg">
           {/* Búsqueda y Actualizar */}
           <div className="mb-6">
             <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4">
@@ -569,7 +679,11 @@ export default function Productos() {
               <div className="block md:hidden">
                 {state.productos.length > 0 ? (
                   state.productos.map((producto) => (
-                    <ProductoCard key={producto.id} producto={producto} />
+                    <ProductoCard
+                      key={producto.id}
+                      producto={producto}
+                      onEdit={handleOpenEdit}
+                    />
                   ))
                 ) : (
                   <div className="bg-white dark:bg-gray-800 rounded-lg p-8 text-center">
@@ -587,6 +701,7 @@ export default function Productos() {
                 <ProductoTable
                   productos={state.productos}
                   searchTerm={state.searchTerm}
+                  onEdit={handleOpenEdit}
                 />
               </div>
             </>
@@ -605,7 +720,7 @@ export default function Productos() {
         </div>
 
         {/* Modal Crear Producto */}
-        <CreateProductoModal
+        <ProductoFormModal
           form={createForm}
           show={state.showCreateModal}
           onClose={() =>
@@ -613,6 +728,25 @@ export default function Productos() {
           }
           onSubmit={handleCreateSubmit}
           isLoading={state.isCreating}
+        />
+
+        {/* Modal Editar Producto */}
+        <ProductoFormModal
+          form={editForm}
+          show={state.showEditModal}
+          onClose={() =>
+            setState((prev) => ({
+              ...prev,
+              showEditModal: false,
+              editingProducto: null,
+            }))
+          }
+          onSubmit={handleEditSubmit}
+          isLoading={state.isUpdating}
+          title="Editar Producto"
+          description="Modifica el nombre y la descripción del producto."
+          submitText="Guardar Cambios"
+          loadingText="Guardando..."
         />
       </div>
     </div>

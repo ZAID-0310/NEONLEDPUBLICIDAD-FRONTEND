@@ -32,14 +32,17 @@ const MAX_ITEMS = 50;
 
 function calcItemsPerPage() {
   const available = window.innerHeight - RESERVED_HEIGHT;
-  return Math.min(MAX_ITEMS, Math.max(MIN_ITEMS, Math.floor(available / ROW_HEIGHT)));
+  return Math.min(
+    MAX_ITEMS,
+    Math.max(MIN_ITEMS, Math.floor(available / ROW_HEIGHT)),
+  );
 }
 export default function Page() {
   const searchParams = useSearchParams();
   const currentPage = searchParams.get("page") || 1;
   const [data, setData] = useState([]);
 
-    const [itemsPerPage, setItemsPerPage] = useState(null);
+  const [itemsPerPage, setItemsPerPage] = useState(null);
 
   useEffect(() => {
     setItemsPerPage(calcItemsPerPage());
@@ -49,52 +52,62 @@ export default function Page() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
+
   const router = useRouter();
 
-  async function fetchContacts() {
-    setIsRefreshing(true);
-    let page = 1;
-    let allData = [];
-    let hasMorePages = true;
+  async function fetchContacts(page = 1, isManualRefresh = false) {
+    if (isManualRefresh) {
+      setIsRefreshing(true);
+    } else {
+      setIsLoading(true);
+    }
 
-    while (hasMorePages) {
-      try {
-        const response = await axios.get(`${URL_API}?page=${page}`, {
+    try {
+      const response = await axios.get(
+        `${URL_API}?page=${page}&per_page=${itemsPerPage}`,
+        {
           headers: {
             Authorization: `Bearer ${getCookie("token")}`,
           },
+        },
+      );
+
+      const pageData = response.data.data || [];
+
+      setData(pageData);
+      setFilteredData(pageData);
+
+      // Metadatos de paginación directa de Laravel
+      const lastPage =
+        response.data.last_page ?? response.data.meta?.last_page ?? 1;
+      const total =
+        response.data.total ?? response.data.meta?.total ?? pageData.length;
+
+      setTotalPages(lastPage);
+      if (typeof setTotalRecords === "function") {
+        setTotalRecords(total);
+      }
+    } catch (error) {
+      console.error("Error al obtener los datos:", error.message);
+
+      if (error.response && error.response.status === 401) {
+        Swal.fire({
+          title: "Sesión Expirada",
+          text: "Por favor, inicia sesión nuevamente.",
+          icon: "warning",
+          confirmButtonText: "OK",
+        }).then(() => {
+          deleteCookie("contacto");
+          user_service.logoutClient(router);
         });
-
-        if (response.data.data.length === 0) {
-          hasMorePages = false;
-          break;
-        }
-
-        allData = [...allData, ...response.data.data];
-        page++;
-      } catch (error) {
-        hasMorePages = false;
-        console.error("Error al obtener los datos:", error.message);
-
-        if (error.response && error.response.status === 401) {
-          Swal.fire({
-            title: "Sesión Expirada",
-            text: "Por favor, inicia sesión nuevamente.",
-            icon: "warning",
-            confirmButtonText: "OK",
-          }).then(() => {
-            deleteCookie("contacto");
-            user_service.logoutClient(router);
-          });
-        }
+      }
+    } finally {
+      if (isManualRefresh) {
+        setIsRefreshing(false);
+      } else {
+        setIsLoading(false);
       }
     }
-
-    setData(allData);
-    setFilteredData(allData);
-    setTotalPages(Math.ceil(allData.length / itemsPerPage));
-    setIsLoading(false);
-    setIsRefreshing(false);
   }
 
   function formatearFecha(fecha) {
@@ -293,10 +306,10 @@ export default function Page() {
     }
   }
 
- useEffect(() => {
-  if (itemsPerPage === null) return;
-  fetchContacts(currentPage);
-}, [currentPage, itemsPerPage]);
+  useEffect(() => {
+    if (itemsPerPage === null) return;
+    fetchContacts(currentPage);
+  }, [currentPage, itemsPerPage]);
 
   useEffect(() => {
     if (searchTerm.trim() === "") {
@@ -465,11 +478,11 @@ export default function Page() {
     </div>
   );
 
- const perPage = itemsPerPage ?? MIN_ITEMS;
-const paginatedData = filteredData.slice(
-  (Number(currentPage) - 1) * perPage,
-  Number(currentPage) * perPage,
-);
+  const perPage = itemsPerPage ?? MIN_ITEMS;
+  const paginatedData = filteredData.slice(
+    (Number(currentPage) - 1) * perPage,
+    Number(currentPage) * perPage,
+  );
 
   return (
     <main className="p-3 sm:p-4 md:p-6 flex flex-col w-full min-h-screen bg-gray-50 dark:bg-gray-900">
