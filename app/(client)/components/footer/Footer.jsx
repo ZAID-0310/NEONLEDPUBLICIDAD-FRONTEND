@@ -1,3 +1,4 @@
+
 import Link from "next/link";
 import { SocialMedia } from "./SocialMedia";
 
@@ -15,8 +16,8 @@ export default function Footer() {
                 Rotulación y Letreros Luminosos
               </h3>
               <ul className="flex flex-col gap-3 text-sm text-gray-300">
-                <li className="flex items-center gap-2">
-                 <span className="text-[#48A8FF]">•</span>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#48A8FF] leading-[1.5] shrink-0">•</span>
                   <Link
                     href="/productos/letras-acrilico"
                     className="hover:text-[#48A8FF] transition-colors"
@@ -25,7 +26,7 @@ export default function Footer() {
                   </Link>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-[#48A8FF] mt-1">•</span>{" "}
+                  <span className="text-[#48A8FF] leading-[1.5] shrink-0">•</span>
                   <Link
                     href="/productos/letras-doradas"
                     className="hover:text-[#48A8FF] transition-colors"
@@ -34,7 +35,7 @@ export default function Footer() {
                   </Link>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-[#48A8FF] mt-1">•</span>{" "}
+                  <span className="text-[#48A8FF] leading-[1.5] shrink-0">•</span>
                   <Link
                     href="/productos/letras-plateadas"
                     className="hover:text-[#48A8FF] transition-colors"
@@ -43,7 +44,7 @@ export default function Footer() {
                   </Link>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-[#48A8FF] mt-1">•</span>{" "}
+                  <span className="text-[#48A8FF] leading-[1.5] shrink-0">•</span>
                   <Link
                     href="/productos/letreros-luminosos"
                     className="hover:text-[#48A8FF] transition-colors"
@@ -52,7 +53,7 @@ export default function Footer() {
                   </Link>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-[#48A8FF] mt-1">•</span>{" "}
+                  <span className="text-[#48A8FF] leading-[1.5] shrink-0">•</span>
                   <Link
                     href="/productos/neon-led"
                     className="hover:text-[#48A8FF] transition-colors"
@@ -61,7 +62,7 @@ export default function Footer() {
                   </Link>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-[#48A8FF] mt-1">•</span>{" "}
+                  <span className="text-[#48A8FF] leading-[1.5] shrink-0">•</span>
                   <Link
                     href="/productos/cajas-luminosas"
                     className="hover:text-[#48A8FF] transition-colors"
@@ -70,7 +71,7 @@ export default function Footer() {
                   </Link>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-[#48A8FF] mt-1">•</span>{" "}
+                  <span className="text-[#48A8FF] leading-[1.5] shrink-0">•</span>
                   <Link
                     href="/productos/letras-neon"
                     className="hover:text-[#48A8FF] transition-colors"
@@ -86,7 +87,7 @@ export default function Footer() {
               </h3>
               <ul className="flex flex-col gap-3 text-sm text-gray-300">
                 <li className="flex items-start gap-2">
-                  <span className="text-[#48A8FF] mt-1">•</span>{" "}
+                  <span className="text-[#48A8FF] leading-[1.5] shrink-0">•</span>
                   <Link
                     href="/productos/displays"
                     className="hover:text-[#48A8FF] transition-colors"
@@ -95,7 +96,7 @@ export default function Footer() {
                   </Link>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-[#48A8FF] mt-1">•</span>{" "}
+                  <span className="text-[#48A8FF] leading-[1.5] shrink-0">•</span>
                   <Link
                     href="/productos/pantalla-led"
                     className="hover:text-[#48A8FF] transition-colors"
@@ -104,7 +105,7 @@ export default function Footer() {
                   </Link>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-[#48A8FF] mt-1">•</span>{" "}
+                  <span className="text-[#48A8FF] leading-[1.5] shrink-0">•</span>
                   <Link
                     href="/productos/holografico"
                     className="hover:text-[#48A8FF] transition-colors"
@@ -113,7 +114,7 @@ export default function Footer() {
                   </Link>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-[#48A8FF] mt-1">•</span>{" "}
+                  <span className="text-[#48A8FF] leading-[1.5] shrink-0">•</span>
                   <Link
                     href="/productos/pixel-led"
                     className="hover:text-[#48A8FF] transition-colors"
@@ -122,7 +123,7 @@ export default function Footer() {
                   </Link>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-[#48A8FF] mt-1">•</span>{" "}
+                  <span className="text-[#48A8FF] leading-[1.5] shrink-0">•</span>
                   <Link
                     href="/productos/techos-led"
                     className="hover:text-[#48A8FF] transition-colors"
@@ -138,7 +139,7 @@ export default function Footer() {
               </h3>
               <ul className="flex flex-col gap-3 text-sm text-gray-300">
                 <li className="flex items-start gap-2">
-                  <span className="text-[#48A8FF] mt-1">•</span>{" "}
+                  <span className="text-[#48A8FF] leading-[1.5] shrink-0">•</span>
                   <Link
                     href="/productos/impresion-vinilo"
                     className="hover:text-[#48A8FF] transition-colors"
@@ -147,7 +148,7 @@ export default function Footer() {
                   </Link>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-[#48A8FF] mt-1">•</span>{" "}
+                  <span className="text-[#48A8FF] leading-[1.5] shrink-0">•</span>
                   <Link
                     href="/productos/menu-board"
                     className="hover:text-[#48A8FF] transition-colors"
@@ -163,7 +164,7 @@ export default function Footer() {
               </h3>
               <ul className="flex flex-col gap-3 text-sm text-gray-300">
                 <li className="flex items-start gap-2">
-                  <span className="text-[#48A8FF] mt-1">•</span>{" "}
+                  <span className="text-[#48A8FF] leading-[1.5] shrink-0">•</span>
                   <Link
                     href="/productos/sillas-luminosas"
                     className="hover:text-[#48A8FF] transition-colors"
@@ -172,7 +173,7 @@ export default function Footer() {
                   </Link>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-[#48A8FF] mt-1">•</span>{" "}
+                  <span className="text-[#48A8FF] leading-[1.5] shrink-0">•</span>
                   <Link
                     href="/productos/letras-pintadas"
                     className="hover:text-[#48A8FF] transition-colors"
@@ -343,3 +344,4 @@ export default function Footer() {
     </footer>
   );
 }
+
