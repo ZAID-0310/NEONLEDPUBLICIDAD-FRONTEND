@@ -13,6 +13,7 @@ import {
   Calendar,
   FileText,
   Pencil,
+  Trash2,
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -21,6 +22,8 @@ import {
   getProductos,
   createProducto,
   updateProducto,
+  updateEstadoProducto,
+  deleteProducto,
 } from "../service/ProductoConexion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -142,20 +145,34 @@ const AlertNotification = ({ alert, onClose }) => {
   );
 };
 
-// Badge de estado
-const EstadoBadge = ({ estado }) =>
-  estado == 1 ? (
-    <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs md:text-sm font-semibold bg-emerald-500/20 border bg-green-100 text-green-800 backdrop-blur-sm">
-      Activo
-    </span>
-  ) : (
-    <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs md:text-sm font-semibold bg-rose-500/20  border bg-yellow-100 text-yellow-800 backdrop-blur-sm">
-      Inactivo
-    </span>
+// Badge de estado (clickeable para activar / desactivar)
+const EstadoBadge = ({ estado, onToggle, disabled }) => {
+  const activo = estado == 1;
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      disabled={disabled}
+      title={activo ? "Clic para desactivar" : "Clic para activar"}
+      className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs md:text-sm font-semibold border transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+        activo
+          ? "bg-green-100 text-green-800 hover:bg-green-200"
+          : "bg-yellow-100 text-yellow-800 hover:bg-yellow-200"
+      }`}
+    >
+      {activo ? "Activo" : "Inactivo"}
+    </button>
   );
+};
 
 // Card para vista móvil
-const ProductoCard = ({ producto, onEdit }) => (
+const ProductoCard = ({
+  producto,
+  onEdit,
+  onToggleEstado,
+  togglingId,
+  onDelete,
+}) => (
   <div className="bg-white rounded-lg shadow-md p-4 mb-3 border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
     <div className="flex items-center gap-2 mb-3">
       <div className="bg-blue-100 rounded-full p-2 dark:bg-blue-900">
@@ -165,7 +182,11 @@ const ProductoCard = ({ producto, onEdit }) => (
         # {producto.id} - {producto.nombre}
       </span>
       <div className="accordion ml-auto">
-        <EstadoBadge estado={producto.estado} />
+        <EstadoBadge
+          estado={producto.estado}
+          onToggle={() => onToggleEstado(producto)}
+          disabled={togglingId === producto.id}
+        />
       </div>
     </div>
 
@@ -190,18 +211,34 @@ const ProductoCard = ({ producto, onEdit }) => (
       </div>
     </div>
 
-    <Button
-      size="sm"
-      onClick={() => onEdit(producto)}
-      className="mt-3 w-full bg-blue-600 hover:bg-blue-700"
-    >
-      <Pencil size={14} className="mr-1" /> Editar
-    </Button>
+    <div className="mt-3 flex gap-2">
+      <Button
+        size="sm"
+        onClick={() => onEdit(producto)}
+        className="flex-1 bg-blue-600 hover:bg-blue-700"
+      >
+        <Pencil size={14} className="mr-1" /> Editar
+      </Button>
+      <Button
+        size="sm"
+        onClick={() => onDelete(producto)}
+        className="flex-1 bg-red-600 hover:bg-red-700"
+      >
+        <Trash2 size={14} className="mr-1" /> Eliminar
+      </Button>
+    </div>
   </div>
 );
 
 // Tabla para Desktop
-const ProductoTable = ({ productos, searchTerm, onEdit }) => (
+const ProductoTable = ({
+  productos,
+  searchTerm,
+  onEdit,
+  onToggleEstado,
+  togglingId,
+  onDelete,
+}) => (
   <Table>
     <TableHeader className="bg-blue-600">
       <TableRow className="hover:bg-blue-600">
@@ -263,16 +300,31 @@ const ProductoTable = ({ productos, searchTerm, onEdit }) => (
               {producto.fechaCreacion}
             </TableCell>
             <TableCell className="px-6 py-5 text-gray-900 text-center whitespace-nowrap dark:text-white">
-              <EstadoBadge estado={producto.estado} />
+              <EstadoBadge
+                estado={producto.estado}
+                onToggle={() => onToggleEstado(producto)}
+                disabled={togglingId === producto.id}
+              />
             </TableCell>
             <TableCell className="px-6 py-5">
-              <Button
-                size="sm"
-                onClick={() => onEdit(producto)}
-                className="bg-blue-600 hover:bg-blue-700 flex items-center gap-1 mx-auto"
-              >
-                <Pencil size={14} /> 
-              </Button>
+              <div className="flex items-center justify-center gap-2">
+                <Button
+                  size="sm"
+                  onClick={() => onEdit(producto)}
+                  className="bg-blue-600 hover:bg-blue-700"
+                  title="Editar"
+                >
+                  <Pencil size={14} />
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => onDelete(producto)}
+                  className="bg-red-600 hover:bg-red-700"
+                  title="Eliminar"
+                >
+                  <Trash2 size={14} />
+                </Button>
+              </div>
             </TableCell>
           </TableRow>
         ))
@@ -422,6 +474,7 @@ const ProductoFormModal = ({
 
 export default function Productos() {
   const [perPage, setPerPage] = useState(() => calculateDynamicPerPage());
+  const [togglingId, setTogglingId] = useState(null);
   const [state, setState] = useState({
     productos: [],
     searchTerm: "",
@@ -585,6 +638,64 @@ export default function Productos() {
     }
   };
 
+  // Activar / desactivar desde el badge
+  const handleToggleEstado = async (producto) => {
+    const nuevoEstado = producto.estado == 1 ? 0 : 1;
+
+    if (
+      nuevoEstado === 0 &&
+      !window.confirm(
+        `¿Desactivar "${producto.nombre}"? Dejará de aparecer en los selectores.`,
+      )
+    ) {
+      return;
+    }
+
+    try {
+      setTogglingId(producto.id);
+      await updateEstadoProducto(producto.id, nuevoEstado);
+      setState((prev) => ({
+        ...prev,
+        productos: prev.productos.map((p) =>
+          p.id === producto.id ? { ...p, estado: nuevoEstado } : p,
+        ),
+      }));
+      showAlert(
+        "update",
+        nuevoEstado === 1 ? "Producto activado." : "Producto desactivado.",
+      );
+    } catch (error) {
+      showAlert("error", error.message || "No se pudo cambiar el estado");
+    } finally {
+      setTogglingId(null);
+    }
+  };
+
+  // Eliminar producto
+  const handleDelete = async (producto) => {
+    if (
+      !window.confirm(
+        `¿Eliminar "${producto.nombre}"? Se borrarán también sus imágenes y no se puede deshacer.`,
+      )
+    ) {
+      return;
+    }
+
+    try {
+      await deleteProducto(producto.id);
+      showAlert("update", "Producto eliminado correctamente.");
+
+      // Si era el único de la página, retrocede una página
+      const page =
+        state.productos.length === 1 && state.currentPage > 1
+          ? state.currentPage - 1
+          : state.currentPage;
+      await loadProductos(page, perPage, state.searchTerm);
+    } catch (error) {
+      showAlert("error", error.message || "No se pudo eliminar el producto");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 dark:text-white p-3 sm:p-4 md:p-6 lg:p-8">
       <AlertNotification
@@ -683,6 +794,9 @@ export default function Productos() {
                       key={producto.id}
                       producto={producto}
                       onEdit={handleOpenEdit}
+                      onToggleEstado={handleToggleEstado}
+                      togglingId={togglingId}
+                      onDelete={handleDelete}
                     />
                   ))
                 ) : (
@@ -702,6 +816,9 @@ export default function Productos() {
                   productos={state.productos}
                   searchTerm={state.searchTerm}
                   onEdit={handleOpenEdit}
+                  onToggleEstado={handleToggleEstado}
+                  togglingId={togglingId}
+                  onDelete={handleDelete}
                 />
               </div>
             </>
