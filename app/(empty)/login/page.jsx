@@ -5,6 +5,7 @@ import { User, Lock, ArrowLeft, AlertCircle, Sun, Moon } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/app/context/AutContext";
 import { Turnstile } from "@marsidev/react-turnstile";
+import PublicOnlyGuard from "@/app/dashboard/components/PublicOnlyGuard";
 
 const LOCKOUT_STORAGE_KEY = "login_lockout_expiry";
 const ATTEMPTS_STORAGE_KEY = "login_remaining_attempts";
@@ -470,7 +471,8 @@ export default function LoginPage() {
   };
 
   return (
-    <>
+    <PublicOnlyGuard>
+      <>
       {/* <Header /> */}
 
       <div className={`min-h-screen w-full flex flex-col lg:flex-row  ${darkMode ? 'bg-[#07152d]': 'bg-blue-600'}`}>
@@ -818,5 +820,6 @@ export default function LoginPage() {
 
       {/* <Footer /> */}
     </>
+    </PublicOnlyGuard>
   );
 }

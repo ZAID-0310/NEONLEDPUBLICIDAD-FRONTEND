@@ -1,5 +1,5 @@
 "use client";
-
+import RouteGuard from "@/app/dashboard/components/RouteGuard";
 import { useEffect, useState } from "react";
 import {
   Check,
@@ -232,6 +232,7 @@ export default function RolePermissionManager() {
   const stats = getPermissionStats();
 
   return (
+    <RouteGuard>
     <Card className="border-none shadow-md dark:bg-gray-800/95 dark:border dark:border-gray-700">
       <CardHeader className="bg-gradient-to-r from-[rgb(17,87,211)] to-[rgb(14,70,170)] text-white pb-4">
         <div className="flex flex-col-reverse gap-2 justify-center items-center text-center">
@@ -516,6 +517,7 @@ export default function RolePermissionManager() {
                                   permisosRol.includes(permiso.id_permiso));
 
                               return (
+                                
                                 <div
                                   key={permiso.id_permiso}
                                   className={cn(
@@ -590,5 +592,6 @@ export default function RolePermissionManager() {
         </div>
       </CardContent>
     </Card>
+    </RouteGuard>
   );
 }

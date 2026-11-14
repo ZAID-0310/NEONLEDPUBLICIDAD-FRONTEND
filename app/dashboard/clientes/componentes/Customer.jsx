@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import RouteGuard from "@/app/dashboard/components/RouteGuard";
 import {
   Search,
   RefreshCw,
@@ -148,6 +149,7 @@ const AlertNotification = ({ alert, onClose }) => {
   const config = notificationConfig[alert.type] || notificationConfig.error;
 
   return (
+    
     <div className="fixed bottom-4 right-4 z-50 animate-in slide-in-from-bottom-2 duration-300 w-[400px] max-w-[calc(100vw-2rem)]">
       <Alert
         variant={config.variant}
@@ -368,6 +370,7 @@ const Pagination = ({ currentPage, totalPages, loadCustomers }) => {
   }
 
   return (
+    
     <div className="flex justify-center items-center mt-6 flex-wrap gap-1">
       <PageButton
         onClick={() => loadCustomers(currentPage - 1)}
@@ -600,6 +603,7 @@ const Customer = () => {
   const paginatedData = state.customers;
 
   return (
+    <RouteGuard>
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 dark:text-white p-3 sm:p-4 md:p-6 lg:p-8">
       <AlertNotification
         alert={alert}
@@ -762,6 +766,7 @@ const Customer = () => {
         />
       </div>
     </div>
+    </RouteGuard>
   );
 };
 

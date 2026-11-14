@@ -32,10 +32,63 @@ const Contacto = () => {
   })
 
   const [status, setStatus] = useState(null)
+  const [touched, setTouched] = useState({})
+  const [errors, setErrors] = useState({})
 
   const textRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]*$/
-  const numberRegex = /^\+?\d*$/
   const textTypeInputs = ["nombre", "apellido", "distrito"]
+
+  const fieldLabels = {
+    nombre: "Nombre",
+    apellido: "Apellido",
+    telefono: "Teléfono / WhatsApp",
+    distrito: "Distrito",
+    email: "Correo Electrónico",
+    tipo_reclamo: "Motivo de contacto",
+    mensaje: "Mensaje",
+  }
+
+  const validateField = (name, value) => {
+    const strValue = String(value ?? "")
+    const trimmed = strValue.trim()
+
+    switch (name) {
+      case "nombre":
+        if (!trimmed) return "Campo obligatorio"
+        if (trimmed.length < 2) return "El nombre debe tener al menos 2 letras."
+        return ""
+      case "apellido":
+        if (!trimmed) return "Campo obligatorio"
+        if (trimmed.length < 2) return "El apellido debe tener al menos 2 letras."
+        return ""
+      case "telefono": {
+        const telefonoLimpio = strValue.replace(/\s+/g, "")
+        if (!telefonoLimpio) return "Campo obligatorio"
+        if (!/^(\+?51)?9\d{8}$/.test(telefonoLimpio)) {
+          return "Ingresa un teléfono válido (9 dígitos, ej. 994078320)."
+        }
+        return ""
+      }
+      case "distrito":
+        if (!trimmed) return "Campo obligatorio"
+        return ""
+      case "email":
+        if (!trimmed) return "Campo obligatorio"
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(trimmed)) {
+          return "Ingresa un correo válido (ej. nombre@correo.com)."
+        }
+        return ""
+      case "tipo_reclamo":
+        if (!strValue) return "Campo obligatorio"
+        return ""
+      case "mensaje":
+        if (!trimmed) return "Campo obligatorio"
+        if (trimmed.length < 10) return "El mensaje debe tener al menos 10 caracteres."
+        return ""
+      default:
+        return ""
+    }
+  }
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -53,78 +106,70 @@ const Contacto = () => {
     }
 
     setFormData((prevData) => ({ ...prevData, [name]: newValue }))
+
+    if (touched[name]) {
+      const fieldError = validateField(name, newValue)
+      setErrors((prev) => ({ ...prev, [name]: fieldError }))
+    }
+  }
+
+  const handleBlur = (e) => {
+    const { name, value } = e.target
+    setTouched((prev) => ({ ...prev, [name]: true }))
+    const fieldError = validateField(name, value)
+    setErrors((prev) => ({ ...prev, [name]: fieldError }))
   }
 
   const validateForm = () => {
-  const errors = {}
-
-  // Nombre
-  if (!formData.nombre.trim()) {
-    errors.nombre = "El nombre es obligatorio."
-  } else if (formData.nombre.trim().length < 2) {
-    errors.nombre = "El nombre debe tener al menos 2 letras."
+    const newErrors = {}
+    Object.keys(formData).forEach((field) => {
+      const error = validateField(field, formData[field])
+      if (error) newErrors[field] = error
+    })
+    return newErrors
   }
 
-  // Apellido
-  if (!formData.apellido.trim()) {
-    errors.apellido = "El apellido es obligatorio."
-  } else if (formData.apellido.trim().length < 2) {
-    errors.apellido = "El apellido debe tener al menos 2 letras."
+  const getFieldClassName = (fieldName, extraClasses = "") => {
+    const hasError = Boolean(touched[fieldName] && errors[fieldName])
+    return `w-full px-3.5 py-2.5 rounded-xl bg-[#090e1a] border ${
+      hasError
+        ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+        : "border-slate-700/80 hover:border-slate-600 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20"
+    } text-white placeholder:text-slate-500 text-sm transition-all duration-150 outline-none ${extraClasses}`.trim()
   }
 
-  // Teléfono (Perú: 9 dígitos empezando por 9)
-  const telefonoLimpio = formData.telefono.replace(/\s+/g, "")
-  if (!telefonoLimpio) {
-    errors.telefono = "El teléfono es obligatorio."
-  } else if (!/^(\+?51)?9\d{8}$/.test(telefonoLimpio)) {
-    errors.telefono = "Ingresa un teléfono válido (9 dígitos, ej. 994078320)."
-  }
-
-  // Distrito
-  if (!formData.distrito.trim()) {
-    errors.distrito = "El distrito es obligatorio."
-  }
-
-  // Email
-  if (!formData.email.trim()) {
-    errors.email = "El correo electrónico es obligatorio."
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(formData.email.trim())) {
-    errors.email = "Ingresa un correo válido (ej. nombre@correo.com)."
-  }
-
-  // Motivo
-  if (!formData.tipo_reclamo) {
-    errors.tipo_reclamo = "Selecciona un motivo de contacto."
-  }
-
-  // Mensaje
-  if (!formData.mensaje.trim()) {
-    errors.mensaje = "El mensaje es obligatorio."
-  } else if (formData.mensaje.trim().length < 10) {
-    errors.mensaje = "El mensaje debe tener al menos 10 caracteres."
-  }
-
-  return errors
-}
+  const renderFieldError = (fieldName) =>
+    touched[fieldName] && errors[fieldName] ? (
+      <p className="text-xs text-red-400 font-medium">{errors[fieldName]}</p>
+    ) : null
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
-    //Validación antes de enviar
-  const validationErrors = validateForm()
 
-  if (Object.keys(validationErrors).length > 0) {
-    const primerCampo = Object.keys(validationErrors)[0]
+    // Validación antes de enviar
+    const validationErrors = validateForm()
 
-  Swal.fire({
-  title: "Revisa tus datos",
-  html: `
+    if (Object.keys(validationErrors).length > 0) {
+      const allTouched = Object.keys(formData).reduce(
+        (acc, key) => ({ ...acc, [key]: true }),
+        {}
+      )
+      setTouched(allTouched)
+      setErrors(validationErrors)
+
+      const primerCampo = Object.keys(validationErrors)[0]
+
+      Swal.fire({
+        title: "Revisa tus datos",
+        html: `
     <ul style="text-align:left; margin:0 0 15px 0; padding-left:0; list-style-type: none;">
-  ${Object.values(validationErrors)
-    .map((msg) => `<li style="margin-bottom: 6px; display: flex; align-items: flex-start;">
+  ${Object.entries(validationErrors)
+    .map(
+      ([field, msg]) => `<li style="margin-bottom: 6px; display: flex; align-items: flex-start;">
         <span style="color: #06b6d4; margin-right: 10px; font-weight: bold; text-shadow: 0 0 8px #06b6d4;">•</span> 
-        <span>${msg}</span>
-      </li>`)
+        <span><strong>${fieldLabels[field] || field}:</strong> ${msg}</span>
+      </li>`
+    )
     .join("")}
 </ul>
     
@@ -144,21 +189,21 @@ const Contacto = () => {
       }
     </style>
   `,
-  icon: "warning",
-  background: "#0b1220",
-  color: "#ffffff",
-  confirmButtonColor: "#06b6d4",
-  timer: 3000,
-  timerProgressBar: false,  
-  showConfirmButton: false,   
-  allowOutsideClick: false,
-  allowEscapeKey: false,
-}).then((result) => {
-  document.getElementById(primerCampo)?.focus()
-})
+        icon: "warning",
+        background: "#0b1220",
+        color: "#ffffff",
+        confirmButtonColor: "#06b6d4",
+        timer: 3000,
+        timerProgressBar: false,
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+      }).then(() => {
+        document.getElementById(primerCampo)?.focus()
+      })
 
-    return
-  }
+      return
+    }
     
     setStatus("loading")
 
@@ -180,6 +225,8 @@ const Contacto = () => {
           tipo_reclamo: "",
           mensaje: "",
         })
+        setTouched({})
+        setErrors({})
         Swal.fire({
           title: "¡Mensaje enviado con éxito!",
           text: "Nos pondremos en contacto contigo a la brevedad.",
@@ -408,10 +455,13 @@ const Contacto = () => {
                         name="nombre"
                         value={formData.nombre}
                         onChange={handleChange}
+                        onBlur={handleBlur}
+                        aria-invalid={Boolean(touched.nombre && errors.nombre)}
                         required
                         placeholder="Ej. Carlos"
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#090e1a] border border-slate-700/80 hover:border-slate-600 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 text-white placeholder:text-slate-500 text-sm transition-all duration-150 outline-none"
+                        className={getFieldClassName("nombre")}
                       />
+                      {renderFieldError("nombre")}
                     </div>
 
                     <div className="space-y-1.5">
@@ -424,10 +474,13 @@ const Contacto = () => {
                         name="apellido"
                         value={formData.apellido}
                         onChange={handleChange}
+                        onBlur={handleBlur}
+                        aria-invalid={Boolean(touched.apellido && errors.apellido)}
                         required
                         placeholder="Ej. Fernández"
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#090e1a] border border-slate-700/80 hover:border-slate-600 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 text-white placeholder:text-slate-500 text-sm transition-all duration-150 outline-none"
+                        className={getFieldClassName("apellido")}
                       />
+                      {renderFieldError("apellido")}
                     </div>
                   </div>
 
@@ -443,11 +496,14 @@ const Contacto = () => {
                         name="telefono"
                         value={formData.telefono}
                         onChange={handleChange}
+                        onBlur={handleBlur}
+                        aria-invalid={Boolean(touched.telefono && errors.telefono)}
                         required
                         placeholder="999 999 999"
                         maxLength={9}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#090e1a] border border-slate-700/80 hover:border-slate-600 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 text-white placeholder:text-slate-500 text-sm transition-all duration-150 outline-none"
+                        className={getFieldClassName("telefono")}
                       />
+                      {renderFieldError("telefono")}
                     </div>
 
                     <div className="space-y-1.5">
@@ -460,10 +516,13 @@ const Contacto = () => {
                         name="distrito"
                         value={formData.distrito}
                         onChange={handleChange}
+                        onBlur={handleBlur}
+                        aria-invalid={Boolean(touched.distrito && errors.distrito)}
                         required
                         placeholder="Ej. Ate / Miraflores"
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#090e1a] border border-slate-700/80 hover:border-slate-600 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 text-white placeholder:text-slate-500 text-sm transition-all duration-150 outline-none"
+                        className={getFieldClassName("distrito")}
                       />
+                      {renderFieldError("distrito")}
                     </div>
                   </div>
 
@@ -478,10 +537,13 @@ const Contacto = () => {
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
+                      onBlur={handleBlur}
+                      aria-invalid={Boolean(touched.email && errors.email)}
                       required
                       placeholder="nombre@correo.com"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#090e1a] border border-slate-700/80 hover:border-slate-600 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 text-white placeholder:text-slate-500 text-sm transition-all duration-150 outline-none"
+                      className={getFieldClassName("email")}
                     />
+                    {renderFieldError("email")}
                   </div>
 
                   {/* Motivo de Contacto */}
@@ -495,15 +557,16 @@ const Contacto = () => {
                         name="tipo_reclamo"
                         value={formData.tipo_reclamo}
                         onChange={handleChange}
+                        onBlur={handleBlur}
+                        aria-invalid={Boolean(touched.tipo_reclamo && errors.tipo_reclamo)}
                         required
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#090e1a] border border-slate-700/80 hover:border-slate-600 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 text-white text-sm transition-all duration-150 outline-none appearance-none cursor-pointer"
+                        className={getFieldClassName("tipo_reclamo", "appearance-none cursor-pointer")}
                       >
                         <option value="" disabled className="bg-slate-900 text-slate-400">
                           Selecciona un motivo...
                         </option>
                         <option value="CONSULTA" className="bg-slate-900 text-white">Consulta</option>
                         <option value="SUGERENCIA" className="bg-slate-900 text-white">Sugerencia</option>
-                        <option value="OTROS" className="bg-slate-900 text-white">Otros</option>
                       </select>
                       <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5 text-cyan-400">
                         <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
@@ -511,6 +574,7 @@ const Contacto = () => {
                         </svg>
                       </div>
                     </div>
+                    {renderFieldError("tipo_reclamo")}
                   </div>
 
                   {/* Mensaje */}
@@ -523,11 +587,14 @@ const Contacto = () => {
                       name="mensaje"
                       value={formData.mensaje}
                       onChange={handleChange}
+                      onBlur={handleBlur}
+                      aria-invalid={Boolean(touched.mensaje && errors.mensaje)}
                       required
                       placeholder="Escribe aquí tu mensaje detallando tus consultas o requerimientos..."
                       rows={3}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#090e1a] border border-slate-700/80 hover:border-slate-600 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 text-white placeholder:text-slate-500 text-sm transition-all duration-150 outline-none resize-none h-[110px]"
+                      className={getFieldClassName("mensaje", "resize-none h-[110px]")}
                     />
+                    {renderFieldError("mensaje")}
                   </div>
 
                   {/* Botón de Enviar */}

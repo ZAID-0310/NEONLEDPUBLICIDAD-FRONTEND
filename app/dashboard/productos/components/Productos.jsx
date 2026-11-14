@@ -1,5 +1,5 @@
 "use client";
-
+import RouteGuard from "@/app/dashboard/components/RouteGuard";
 import { useState, useEffect, useCallback } from "react";
 import {
   Search,
@@ -21,6 +21,7 @@ import {
   getProductos,
   createProducto,
   updateProducto,
+  updateEstadoProducto,
 } from "../service/ProductoConexion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -142,20 +143,44 @@ const AlertNotification = ({ alert, onClose }) => {
   );
 };
 
-// Badge de estado
+// Badge de estado (solo muestra, no es clickeable)
 const EstadoBadge = ({ estado }) =>
   estado == 1 ? (
-    <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs md:text-sm font-semibold bg-emerald-500/20 border bg-green-100 text-green-800 backdrop-blur-sm">
+    <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs md:text-sm font-semibold border bg-green-100 text-green-800">
       Activo
     </span>
   ) : (
-    <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs md:text-sm font-semibold bg-rose-500/20  border bg-yellow-100 text-yellow-800 backdrop-blur-sm">
+    <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs md:text-sm font-semibold border bg-yellow-100 text-yellow-800">
       Inactivo
     </span>
   );
 
+// Switch para activar / desactivar
+const EstadoSwitch = ({ estado, onToggle, disabled }) => {
+  const activo = estado == 1;
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={activo}
+      onClick={onToggle}
+      disabled={disabled}
+      title={activo ? "Desactivar producto" : "Activar producto"}
+      className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+        activo ? "bg-green-500" : "bg-gray-400"
+      }`}
+    >
+      <span
+        className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
+          activo ? "translate-x-5" : "translate-x-0.5"
+        }`}
+      />
+    </button>
+  );
+};
+
 // Card para vista móvil
-const ProductoCard = ({ producto, onEdit }) => (
+const ProductoCard = ({ producto, onEdit, onToggleEstado, togglingId }) => (
   <div className="bg-white rounded-lg shadow-md p-4 mb-3 border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
     <div className="flex items-center gap-2 mb-3">
       <div className="bg-blue-100 rounded-full p-2 dark:bg-blue-900">
@@ -190,18 +215,31 @@ const ProductoCard = ({ producto, onEdit }) => (
       </div>
     </div>
 
-    <Button
-      size="sm"
-      onClick={() => onEdit(producto)}
-      className="mt-3 w-full bg-blue-600 hover:bg-blue-700"
-    >
-      <Pencil size={14} className="mr-1" /> Editar
-    </Button>
+    <div className="mt-3 flex items-center gap-3">
+      <Button
+        size="sm"
+        onClick={() => onEdit(producto)}
+        className="flex-1 bg-blue-600 hover:bg-blue-700"
+      >
+        <Pencil size={14} className="mr-1" /> Editar
+      </Button>
+      <EstadoSwitch
+        estado={producto.estado}
+        onToggle={() => onToggleEstado(producto)}
+        disabled={togglingId === producto.id}
+      />
+    </div>
   </div>
 );
 
 // Tabla para Desktop
-const ProductoTable = ({ productos, searchTerm, onEdit }) => (
+const ProductoTable = ({
+  productos,
+  searchTerm,
+  onEdit,
+  onToggleEstado,
+  togglingId,
+}) => (
   <Table>
     <TableHeader className="bg-blue-600">
       <TableRow className="hover:bg-blue-600">
@@ -266,13 +304,21 @@ const ProductoTable = ({ productos, searchTerm, onEdit }) => (
               <EstadoBadge estado={producto.estado} />
             </TableCell>
             <TableCell className="px-6 py-5">
-              <Button
-                size="sm"
-                onClick={() => onEdit(producto)}
-                className="bg-blue-600 hover:bg-blue-700 flex items-center gap-1 mx-auto"
-              >
-                <Pencil size={14} /> 
-              </Button>
+              <div className="flex items-center justify-center gap-3">
+                <Button
+                  size="sm"
+                  onClick={() => onEdit(producto)}
+                  className="bg-blue-600 hover:bg-blue-700"
+                  title="Editar"
+                >
+                  <Pencil size={14} />
+                </Button>
+                <EstadoSwitch
+                  estado={producto.estado}
+                  onToggle={() => onToggleEstado(producto)}
+                  disabled={togglingId === producto.id}
+                />
+              </div>
             </TableCell>
           </TableRow>
         ))
@@ -422,6 +468,9 @@ const ProductoFormModal = ({
 
 export default function Productos() {
   const [perPage, setPerPage] = useState(() => calculateDynamicPerPage());
+  const [togglingId, setTogglingId] = useState(null);
+  const [confirmEstado, setConfirmEstado] = useState(null);
+  const [confirmDesactivar, setConfirmDesactivar] = useState(null);
   const [state, setState] = useState({
     productos: [],
     searchTerm: "",
@@ -578,14 +627,46 @@ export default function Productos() {
           }
         });
       } else {
-        showAlert("error", error.message || "No se pudo actualizar el producto");
+        showAlert(
+          "error",
+          error.message || "No se pudo actualizar el producto",
+        );
       }
     } finally {
       setState((prev) => ({ ...prev, isUpdating: false }));
     }
   };
 
+  // Ejecuta el cambio de estado en el backend
+  const ejecutarToggle = async (producto, nuevoEstado) => {
+    try {
+      setTogglingId(producto.id);
+      await updateEstadoProducto(producto.id, nuevoEstado);
+      setState((prev) => ({
+        ...prev,
+        productos: prev.productos.map((p) =>
+          p.id === producto.id ? { ...p, estado: nuevoEstado } : p,
+        ),
+      }));
+      showAlert(
+        "update",
+        nuevoEstado === 1 ? "Producto activado." : "Producto desactivado.",
+      );
+    } catch (error) {
+      showAlert("error", error.message || "No se pudo cambiar el estado");
+    } finally {
+      setTogglingId(null);
+    }
+  };
+
+  // Al desactivar pide confirmación; al activar va directo
+  const handleToggleEstado = (producto) => {
+    const nuevoEstado = producto.estado == 1 ? 0 : 1;
+    setConfirmEstado({ producto, nuevoEstado });
+  };
+
   return (
+    <RouteGuard>
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 dark:text-white p-3 sm:p-4 md:p-6 lg:p-8">
       <AlertNotification
         alert={alert}
@@ -683,6 +764,8 @@ export default function Productos() {
                       key={producto.id}
                       producto={producto}
                       onEdit={handleOpenEdit}
+                      onToggleEstado={handleToggleEstado}
+                      togglingId={togglingId}
                     />
                   ))
                 ) : (
@@ -702,6 +785,8 @@ export default function Productos() {
                   productos={state.productos}
                   searchTerm={state.searchTerm}
                   onEdit={handleOpenEdit}
+                  onToggleEstado={handleToggleEstado}
+                  togglingId={togglingId}
                 />
               </div>
             </>
@@ -748,7 +833,64 @@ export default function Productos() {
           submitText="Guardar Cambios"
           loadingText="Guardando..."
         />
+
+        {/* Modal confirmar cambio de estado (Activar / Desactivar) */}
+        <Dialog
+          open={!!confirmEstado}
+          onOpenChange={(open) => !open && setConfirmEstado(null)}
+        >
+          <DialogContent className="sm:max-w-md bg-white dark:bg-gray-900 p-8 text-center rounded-2xl shadow-2xl border-0">
+            <div className="flex flex-col items-center">
+              {/* Icono de información grande dentro de un círculo */}
+              <div className="w-24 h-24 rounded-full border-4 border-cyan-400 flex items-center justify-center mb-6 text-cyan-400">
+                <span className="text-6xl font-serif font-light leading-none select-none">
+                  i
+                </span>
+              </div>
+
+              <DialogHeader className="items-center text-center space-y-2">
+                <DialogTitle className="text-2xl font-bold text-gray-800 dark:text-white leading-snug">
+                  {confirmEstado?.nuevoEstado == 0
+                    ? "¿Desactivar producto?"
+                    : "¿Activar producto?"}
+                </DialogTitle>
+                <DialogDescription className="text-gray-500 dark:text-gray-400 text-sm">
+                  {confirmEstado?.nuevoEstado == 0
+                    ? `¿Deseas desactivar "${confirmEstado?.producto?.nombre}"?`
+                    : `¿Deseas activar "${confirmEstado?.producto?.nombre}"?`}
+                </DialogDescription>
+              </DialogHeader>
+
+              {/* Botones de acción inferiores */}
+              <div className="flex gap-3 w-full pt-8">
+                <Button
+                  onClick={() => {
+                    const { producto, nuevoEstado } = confirmEstado;
+                    setConfirmEstado(null);
+                    ejecutarToggle(producto, nuevoEstado);
+                  }}
+                  className={`flex-1 text-white font-medium py-3 rounded-lg shadow-md transition-all ${
+                    confirmEstado?.nuevoEstado == 0
+                      ? "bg-red-500 hover:bg-red-600"
+                      : "bg-green-600 hover:bg-green-700"
+                  }`}
+                >
+                  {confirmEstado?.nuevoEstado == 0
+                    ? "Sí, desactivar"
+                    : "Sí, activar"}
+                </Button>
+                <Button
+                  onClick={() => setConfirmEstado(null)}
+                  className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 rounded-lg shadow-md transition-all"
+                >
+                  Cancelar
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
+    </RouteGuard>
   );
 }

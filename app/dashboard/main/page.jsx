@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import RouteGuard from "@/app/dashboard/components/RouteGuard";
 import { getCookie, deleteCookie, setCookie } from "cookies-next";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
@@ -323,6 +324,7 @@ export default function Page() {
   const permissions = getRolePermissions(userRole);
 
   return (
+    <RouteGuard>
     <div className="container mx-auto py-6 px-4 max-w-5xl">
       <Card className="overflow-hidden border-none shadow-md dark:bg-gray-800/95 dark:border dark:border-gray-700">
         <div className="bg-[#1056d2] p-4 text-white">
@@ -627,5 +629,6 @@ export default function Page() {
         />
       )}
     </div>
+    </RouteGuard>
   );
 }

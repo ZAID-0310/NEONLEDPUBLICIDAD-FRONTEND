@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import RouteGuard from "@/app/dashboard/components/RouteGuard";
 import axios from "axios";
 import { setCookie, getCookie, deleteCookie } from "cookies-next";
 import user_service from "../users/services/user.service";
@@ -438,6 +439,7 @@ export default function Page() {
   );
 
   return (
+    <RouteGuard>
     <main className="p-4 md:p-6 flex flex-col w-full min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="bg-white rounded-xl shadow-sm p-6 mb-6 dark:bg-gray-800 dark:text-white">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
@@ -704,5 +706,6 @@ export default function Page() {
         )}
       </div>
     </main>
+    </RouteGuard>
   );
 }
