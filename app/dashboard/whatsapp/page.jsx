@@ -1,5 +1,5 @@
 'use client';
-
+import RouteGuard from "@/app/dashboard/components/RouteGuard";
 import { getCookie } from 'cookies-next';
 import { useMemo, useState, useEffect } from 'react';
 import { TabButton, Card, CardTitle } from './components/TabButton';
@@ -100,6 +100,7 @@ export default function WhatsAppPage() {
     );
 
   return (
+    <RouteGuard>
     <div className="flex flex-col h-screen w-full bg-slate-50 dark:bg-slate-900">
       {/* ✅ Sistema de notificaciones Toast */}
       <div className="fixed top-4 right-4 z-50 space-y-2 max-w-md">
@@ -282,5 +283,6 @@ export default function WhatsAppPage() {
         </div>
       </main>
     </div>
+    </RouteGuard>
   );
 }

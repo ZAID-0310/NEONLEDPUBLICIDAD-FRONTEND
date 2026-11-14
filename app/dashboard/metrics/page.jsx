@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
+import RouteGuard from "@/app/dashboard/components/RouteGuard";
 import { getCookie } from "cookies-next";
 import url from "../../../api/url";
 
@@ -98,6 +99,7 @@ export default function MetricsPage() {
   }
 
   return (
+    <RouteGuard>
     <div className="w-full p-6 lg:p-10 space-y-12">
 
       {/* 🧭 HEADER + FILTROS */}
@@ -246,6 +248,7 @@ export default function MetricsPage() {
         </Card>
       </div>
     </div>
+    </RouteGuard>
   );
 }
 
@@ -264,6 +267,7 @@ function SummaryCard({ title, value, emoji }) {
     </div>
   );
 }
+
 
 function Card({ title, children }) {
   return (

@@ -1,5 +1,5 @@
 "use client";
-
+import RouteGuard from "@/app/dashboard/components/RouteGuard";
 import { useState, useEffect, useCallback } from "react";
 import {
   Search,
@@ -586,6 +586,7 @@ export default function Productos() {
   };
 
   return (
+    <RouteGuard>
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 dark:text-white p-3 sm:p-4 md:p-6 lg:p-8">
       <AlertNotification
         alert={alert}
@@ -750,5 +751,6 @@ export default function Productos() {
         />
       </div>
     </div>
+    </RouteGuard>
   );
 }

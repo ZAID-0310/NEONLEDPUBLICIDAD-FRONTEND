@@ -1,5 +1,5 @@
 "use client";
-
+import RouteGuard from "@/app/dashboard/components/RouteGuard";
 import { useEffect, useState } from "react";
 import Pagination1 from "../components/Pagination1";
 import PaginationMobile from "../components/PaginationMobile";
@@ -472,6 +472,7 @@ export default function Page() {
   );
 
   return (
+    <RouteGuard>
     <main className="p-3 sm:p-4 md:p-6 flex flex-col w-full min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-6 dark:bg-gray-800 dark:text-white">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
@@ -766,5 +767,6 @@ export default function Page() {
         )}
       </div>
     </main>
+    </RouteGuard>
   );
 }

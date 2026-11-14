@@ -1,6 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
+import RouteGuard from "@/app/dashboard/components/RouteGuard";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
@@ -380,6 +381,7 @@ export default function Page() {
   );
 
   return (
+    <RouteGuard>
     <div className="container mx-auto px-4 py-6 max-w-7xl">
       <Card className="overflow-hidden rounded-xl border-none shadow-md">
         <CardHeader className="bg-blue-600 text-white rounded-t-lg pb-6">
@@ -539,5 +541,6 @@ export default function Page() {
         onUpdateSuccess={handleUpdateSuccess}
       />
     </div>
+    </RouteGuard>
   );
 }
