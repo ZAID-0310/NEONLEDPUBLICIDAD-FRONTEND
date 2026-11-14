@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Calendar, Eye, Image as ImageIcon, Video } from "lucide-react";
 import Slider from "./components/slider/SliderPropuesta";
+import RouteGuard from "@/app/dashboard/components/RouteGuard";
 import propuesta_cliente_service from "../services/propuesta.service";
 import { getCookie, setCookie } from "cookies-next";
 import { useRouter } from "next/navigation";
@@ -40,6 +41,7 @@ export default function Page() {
   };
 
   return (
+    <RouteGuard>
     <div className=" min-h-screen py-10 px-6 overflow-hidden w-full">
       {/* Header */}
       <div className="bg-[#CECECE4D] dark:bg-[#1E293B4D] rounded-3xl p-8 text-center max-w-xl mx-auto border-azul-principal border-2">
@@ -123,5 +125,6 @@ export default function Page() {
         )}
       </div>
     </div>
+    </RouteGuard>
   );
 }

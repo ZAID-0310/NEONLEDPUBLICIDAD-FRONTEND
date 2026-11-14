@@ -1,52 +1,44 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/app/context/AutContext'; // <-- Importamos el Contexto
+import { useAuth } from '@/app/context/AutContext'; 
 
 export default function AuthGuard({ children, requiredRole = null }) {
   const router = useRouter();
-  const { user, isAuthenticated } = useAuth(); 
-
+  const { user, isAuthenticated, isLoading } = useAuth();
   const [authorized, setAuthorized] = useState(false);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (isAuthenticated === undefined) return;
+    if (isLoading) return;
+    
     if (!isAuthenticated) {
-      router.replace('/login');
       setAuthorized(false);
-      setLoading(false);
+      router.replace('/login');
       return;
     }
     if (requiredRole) {
       const rolesArray = requiredRole.includes(',') 
-        ? requiredRole.split(',').map(role => role.trim())
+        ? requiredRole.split(',').map(r => r.trim())
         : [requiredRole];
-      const hasRequiredRole = rolesArray.some(role => {
-        return user?.rol?.toLowerCase() === role.toLowerCase();
-      });
-      if (!hasRequiredRole) {
-        router.replace('/dashboard/unauthorized');
+      const ok = rolesArray.some(r => 
+        user?.rol?.toLowerCase() === r.toLowerCase()
+      );
+      if (!ok) {
         setAuthorized(false);
-        setLoading(false);
+        router.replace('/dashboard/unauthorized');
         return;
       }
     }
     setAuthorized(true);
-    setLoading(false);
 
-  }, [isAuthenticated, user, requiredRole, router]);
+  }, [isLoading, isAuthenticated, user, requiredRole, router]);
 
-  if (loading) {
+  if (isLoading || !authorized) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-purple-500"></div>
       </div>
     );
-  }
-
-  if (!authorized) {
-    return null;
   }
 
   return <>{children}</>;

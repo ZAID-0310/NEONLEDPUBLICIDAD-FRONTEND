@@ -85,3 +85,36 @@ export const updateProducto = async (id, productoData) => {
 
   return await fetchApi(`/productos/${id}`, "PUT", payload);
 };
+
+export const updateEstadoProducto = async (id, estado) => {
+  return await fetchApi(`/productos/${id}/estado`, "PATCH", { estado });
+};
+
+export const deleteProducto = async (id) => {
+  return await fetchApi(`/productos/${id}`, "DELETE");
+};
+
+export const getProductosActivosSelector = async () => {
+  try {
+    const response = await fetchApi("/productos/activos-selector");
+    return response.data || [];
+  } catch (error) {
+    console.error("Error en getProductosActivosSelector:", error);
+    return [];
+  }
+};
+
+export const getProductosNombresMap = async () => {
+  try {
+    const response = await fetchApi("/productos/nombres-map");
+    const lista = response.data || [];
+    // Devuelve un objeto { id: nombre } para buscar rápido
+    return lista.reduce((acc, p) => {
+      acc[p.id_producto] = p.nombre;
+      return acc;
+    }, {});
+  } catch (error) {
+    console.error("Error en getProductosNombresMap:", error);
+    return {};
+  }
+};

@@ -9,6 +9,16 @@ import { Card } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { safeJsonParse } from "@/lib/safe-json"
 
+const headerLabels = {
+  id_empleado: "ID",
+  nombre: "Nombre",
+  apellido: "Apellido",
+  email: "Email",
+  dni: "DNI",
+  telefono: "Teléfono",
+  rol: "Rol",
+};
+
 export default function DataTable({ headers, data, onDelete, onUpdate, onShow }) {
   const router = useRouter()
   const [expandedRow, setExpandedRow] = useState(null)
@@ -134,19 +144,24 @@ export default function DataTable({ headers, data, onDelete, onUpdate, onShow })
 
   const renderDesktopView = () => {
     return (
-      <div className="hidden md:block overflow-auto rounded-md border">
+      <div className="hidden md:block overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
         <Table>
-          <TableHeader>
-            <TableRow className="bg-[#0d6fdc] hover:bg-[#0d10dc]">
+          <TableHeader className="bg-blue-600">
+            <TableRow className="hover:bg-blue-600">
               {headers.map((header) => (
-                <TableHead key={`header-${header}`} className="text-white font-medium text-center">
-                  {header.toUpperCase()}
+                <TableHead
+                  key={`header-${header}`}
+                  className="px-3 py-5 text-center font-medium text-white"
+                >
+                  {headerLabels[header] || header}
                 </TableHead>
               ))}
-              <TableHead className="text-white font-medium text-center">ACCIONES</TableHead>
+              <TableHead className="whitespace-nowrap px-3 py-5 text-center font-medium text-white">
+                Acciones
+              </TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
+          <TableBody className="divide-y divide-gray-200 dark:divide-gray-700">
             {data.map((dataRow, index) => {
               const isEmpleadoAutenticado = empleadoAutenticadoId && dataRow.id_empleado === empleadoAutenticadoId;
               const canEditDelete = verificarEditDelete(dataRow);
@@ -157,15 +172,26 @@ export default function DataTable({ headers, data, onDelete, onUpdate, onShow })
                   className={`${
                     isEmpleadoAutenticado 
                       ? "bg-[#caeafe] text-black" 
-                      : index % 2 === 0 ? "bg-white dark:bg-gray-900" : "bg-gray-50 dark:bg-gray-700"
-                  } hover:bg-neutral-200 transition-colors`}
+                      : index % 2 === 0
+                        ? "bg-white dark:bg-gray-900"
+                        : "bg-gray-50 dark:bg-gray-700"
+                  }`}
                 >
                   {headers.map((header) => (
-                    <TableCell key={`${dataRow.id}-${header}`} className="text-center">
+                    <TableCell
+                      key={`${dataRow.id}-${header}`}
+                      className={`px-3 py-5 text-center ${
+                        header === "nombre" || header === "apellido"
+                          ? "whitespace-nowrap"
+                          : header === "email"
+                            ? "break-all"
+                            : ""
+                      }`}
+                    >
                       {dataRow[header]}
                     </TableCell>
                   ))}
-                  <TableCell className="text-center">
+                  <TableCell className="whitespace-nowrap px-3 py-5 text-center">
                     <div className="flex justify-center space-x-1">
                       {!isEmpleadoAutenticado && (
                         <Button

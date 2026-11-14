@@ -2,14 +2,14 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { deleteCookie, getCookie, setCookie } from "cookies-next";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation"; 
 import auth_service from "../dashboard/users/services/auth.service";
 
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
-// Quita rol y permisos del objeto user antes de guardarlo en la cookie
+
 const sinAutorizacion = (user) => {
   if (!user || typeof user !== "object") return user;
   const { rol, permisos, ...resto } = user;
@@ -19,21 +19,31 @@ const sinAutorizacion = (user) => {
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
-  const pathname = usePathname();
+ 
 
   useEffect(() => {
+
+    let mounted = true;
+
+
     const verifyToken = async () => {
       const token = getCookie("token");
 
       if (!token) {
-        setIsAuthenticated(false);
-        setUser(null);
-        return;
+        if (mounted) {
+    setIsAuthenticated(false);
+    setUser(null);
+    setIsLoading(false);
+  }
+  return;
       }
 
       try {
         const res = await auth_service.me();
+        if (!mounted) return;
+
 
         if (res && res.user) {
           const rolUsuario = res.rol || "cliente";
@@ -43,33 +53,36 @@ export const AuthProvider = ({ children }) => {
             permisos: res.permisos || [],
           };
 
-          setIsAuthenticated(true);
           setUser(usuarioConRol);
+          setIsAuthenticated(true);
 
           setCookie("user", JSON.stringify(sinAutorizacion(res.user)), {
             maxAge: 300 * 60,
             path: "/",
           });
-          if (pathname === "/login/") {
-            router.replace("/dashboard/main");
-          }
         } else {
           setIsAuthenticated(false);
           setUser(null);
           auth_service.clearAuthCookies();
-          router.replace("/login");
         }
       } catch (error) {
+        if (!mounted) return;
         console.error("Error al verificar el token:", error);
         setIsAuthenticated(false);
         setUser(null);
         deleteCookie("token");
+        deleteCookie("user");
+      } finally {
+        if (mounted) setIsLoading(false);
       }
     };
 
     verifyToken();
-  }, [pathname, router]);
-
+    return () => {
+      mounted = false;
+    };
+  }, []);
+  
   const login = async (formData) => {
     try {
       const result = await auth_service.login(formData);
@@ -79,7 +92,6 @@ export const AuthProvider = ({ children }) => {
           success: false,
           status: result.status,
           message: result.message,
-          // Importante: conserva remaining_attempts, retry_after, etc.
           data: result.data || {},
         };
       }
@@ -92,19 +104,16 @@ export const AuthProvider = ({ children }) => {
         permisos,
       };
 
-      // estado de react con rol y permisos
       setUser(usuarioConRol);
-
       setCookie("token", result.token, { maxAge: 300 * 60, path: "/" });
-      // cookie user , sin rol ni permiso
       setCookie("user", JSON.stringify(sinAutorizacion(result.user)), {
         maxAge: 300 * 60,
         path: "/",
       });
 
       setIsAuthenticated(true);
+      setIsLoading(false);
       router.replace("/dashboard/main");
-
       return { success: true };
     } catch (error) {
       return {
@@ -124,7 +133,7 @@ export const AuthProvider = ({ children }) => {
       auth_service.clearAuthCookies();
       setIsAuthenticated(false);
       setUser(null);
-      setTimeout(() => router.replace("/login/"), 300);
+      router.replace("/login");
     }
   };
 
@@ -136,21 +145,18 @@ export const AuthProvider = ({ children }) => {
       .replace(/[\u0300-\u036f]/g, "")
       .replace(/\s+/g, "-");
 
-  // Solo usa el estado en memoria (sin leer cookies)
   const hasPermission = (permiso) => {
     const rol = user?.rol;
     if (rol === "administrador") return true;
-
     const permisos = user?.permisos;
     if (!Array.isArray(permisos)) return false;
-
     const normalizados = permisos.map((p) => normalize(p));
     return normalizados.includes(normalize(permiso));
   };
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, user, login, logout, hasPermission }}
+      value={{ isAuthenticated, isLoading, user, login, logout, hasPermission }}
     >
       {children}
     </AuthContext.Provider>
