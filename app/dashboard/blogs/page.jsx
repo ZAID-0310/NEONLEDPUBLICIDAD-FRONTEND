@@ -57,6 +57,10 @@ export default function Page() {
   const router = useRouter();
   
   useEffect(() => {
+    fetchData();
+  }, []);
+
+  useEffect(() => {
     filterBlogs();
   }, [activeFilter, debouncedSearchQuery, allBlogs, myBlogs]);
 
