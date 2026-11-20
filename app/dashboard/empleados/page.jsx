@@ -14,6 +14,7 @@ import {
   Eye,
   Edit,
   Trash2,
+  Power,
   Mail,
   Phone,
   User,
@@ -52,6 +53,7 @@ const headers = [
   "dni",
   "telefono",
   "rol",
+  "estado",
 ];
 
 import auth_service from "../users/services/auth.service";
@@ -77,6 +79,7 @@ const normalizeEmployee = (employee) => {
   return {
     ...employee,
     id: employee.id_empleado,
+    estado: Boolean(employee?.estado),
     id_rol:
       employee.id_rol ??
       employee.rol?.id_rol ??
@@ -90,7 +93,13 @@ const normalizeEmployee = (employee) => {
 };
 
 // Componente Card para móvil
-const EmployeeCard = ({ employee, onShow, onUpdate, onDelete }) => (
+const EmployeeCard = ({
+  employee,
+  onShow,
+  onUpdate,
+  onDelete,
+  onToggleEstado,
+}) => (
   <div className="bg-white rounded-lg shadow-md p-4 mb-3 border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
     <div className="flex flex-wrap-reverse justify-center gap-2 items-center mb-3">
       <div className="flex items-center gap-2">
@@ -103,6 +112,15 @@ const EmployeeCard = ({ employee, onShow, onUpdate, onDelete }) => (
       </div>
       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
         {employee.rol || employee.rol?.nombre || "Sin rol"}
+      </span>
+      <span
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+          employee.estado
+            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+            : "bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+        }`}
+      >
+        {employee.estado ? "Activo" : "Inactivo"}
       </span>
     </div>
 
@@ -142,6 +160,19 @@ const EmployeeCard = ({ employee, onShow, onUpdate, onDelete }) => (
       >
         <Edit size={16} />
       </button>
+      {auth_service.hasPermission("editar-empleados") && (
+        <button
+          onClick={() => onToggleEstado(employee.id_empleado)}
+          title={employee.estado ? "Desactivar" : "Activar"}
+          className={`p-2 rounded-lg transition-colors dark:hover:bg-gray-700 ${
+            employee.estado
+              ? "text-green-600 hover:bg-green-50"
+              : "text-gray-500 hover:bg-gray-100"
+          }`}
+        >
+          <Power size={16} />
+        </button>
+      )}
       {auth_service.hasPermission("eliminar-empleados") && (
         <button
           onClick={() => onDelete(employee.id_empleado)}
@@ -302,6 +333,53 @@ export default function Page() {
     });
   }
 
+  function onToggleEstado(id) {
+    const empleado = data.find((r) => r.id == id);
+    if (!empleado) return;
+    const nuevoEstado = !empleado.estado;
+    const accion = nuevoEstado ? "activar" : "desactivar";
+
+    Swal.fire({
+      title: `¿Deseas ${accion} a este empleado?`,
+      text: `${empleado.nombre} ${empleado.apellido}`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "rgb(17, 87, 211)",
+      cancelButtonColor: "#d33",
+      confirmButtonText: `Sí, ${accion}`,
+      cancelButtonText: "Cancelar",
+    }).then(async (result) => {
+      if (!result.isConfirmed) return;
+      try {
+        const response = await empleado_service.cambiarEstado(id, nuevoEstado);
+        if (response.status === 403) return;
+        if (response.status === 200) {
+          setData((prev) =>
+            prev.map((e) =>
+              e.id === id ? { ...e, estado: nuevoEstado } : e,
+            ),
+          );
+          Swal.fire({
+            icon: "success",
+            title: "Listo",
+            text: response.message,
+            confirmButtonColor: "rgb(17, 87, 211)",
+          });
+        } else {
+          throw new Error(response.message || "Error");
+        }
+      } catch (error) {
+        console.error("Error al cambiar estado:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: error.message || "No se pudo cambiar el estado del empleado.",
+          confirmButtonColor: "rgb(17, 87, 211)",
+        });
+      }
+    });
+  }
+
   function onUpdate(idUpdate) {
     const selectedData = data.find((r) => r.id == idUpdate);
     const preparedData = {
@@ -382,165 +460,167 @@ export default function Page() {
 
   return (
     <RouteGuard>
-    <div className="container mx-auto px-4 py-6 max-w-7xl">
-      <Card className="overflow-hidden rounded-xl border-none shadow-md">
-        <CardHeader className="bg-blue-600 text-white rounded-t-lg pb-6">
-          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-            <div>
-              <CardTitle className="text-2xl font-bold flex items-center gap-2">
-                <Users className="h-6 w-6" />
-                Gestión de Empleados
-              </CardTitle>
-              <CardDescription className="text-white/80 mt-1">
-                Administra la información de los empleados de la empresa
-              </CardDescription>
-            </div>
-            {auth_service.hasPermission("crear-empleados") && (
-              <Button
-                className="bg-white text-blue-primary hover:bg-gray-100 transition-colors shadow-sm w-full md:w-auto"
-                onClick={() => {
-                  setDataUpdate(null);
-                  setModal(true);
-                }}
-              >
-                <PlusCircle className="h-4 w-4 mr-2" />
-                Añadir empleado
-              </Button>
-            )}
-          </div>
-        </CardHeader>
-
-        <CardContent className="p-4 sm:p-6 dark:bg-gray-800">
-          {/* Filtros y controles */}
-          <div className="mb-6 space-y-4">
-            <div className="flex flex-col sm:flex-row gap-3 justify-between items-center">
-              <div className="w-full sm:w-64">
-                <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  BUSCAR
-                </label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    type="text"
-                    placeholder="Buscar empleado..."
-                    className="w-full bg-white pl-9 dark:border-gray-600 dark:bg-gray-800 dark:text-white focus-visible:ring-gray-400 dark:focus-visible:ring-gray-500"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
+      <div className="container mx-auto px-4 py-6 max-w-7xl">
+        <Card className="overflow-hidden rounded-xl border-none shadow-md">
+          <CardHeader className="bg-blue-600 text-white rounded-t-lg pb-6">
+            <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+              <div>
+                <CardTitle className="text-2xl font-bold flex items-center gap-2">
+                  <Users className="h-6 w-6" />
+                  Gestión de Empleados
+                </CardTitle>
+                <CardDescription className="text-white/80 mt-1">
+                  Administra la información de los empleados de la empresa
+                </CardDescription>
               </div>
-
-              <Button
-                onClick={fetchEmpleados}
-                disabled={isLoading}
-                className="flex w-full items-center gap-2 bg-blue-600 hover:bg-blue-700 sm:w-auto"
-              >
-                <RefreshCw
-                  className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
-                />
-                Actualizar
-              </Button>
-            </div>
-
-            {/* Filtro por rol */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-gray-50 p-3 rounded-lg border border-gray-100 dark:border-gray-700 dark:bg-blue-900/20">
-              <div className="flex items-center gap-2">
-                <Filter className="h-4 w-4 text-blue-primary" />
-                <span className="text-sm font-medium">Filtrar por rol:</span>
-              </div>
-              <Select value={selectedRole} onValueChange={setSelectedRole}>
-                <SelectTrigger className="w-full sm:w-[180px] bg-white dark:bg-gray-800">
-                  <SelectValue placeholder="Todos los roles" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos los roles</SelectItem>
-                  {roles.map((rol) => (
-                    <SelectItem key={rol.id_rol} value={String(rol.id_rol)}>
-                      {formatRoleName(rol.nombre)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              {selectedRole !== "all" && (
+              {auth_service.hasPermission("crear-empleados") && (
                 <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setSelectedRole("all")}
-                  className="h-8 w-8 p-0 text-gray-500 hover:bg-gray-200 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white"
-                  aria-label="Limpiar filtro de rol"
-                  title="Limpiar filtro"
+                  className="bg-white text-blue-primary hover:bg-gray-100 transition-colors shadow-sm w-full md:w-auto"
+                  onClick={() => {
+                    setDataUpdate(null);
+                    setModal(true);
+                  }}
                 >
-                  <X className="h-4 w-4" />
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Añadir empleado
                 </Button>
               )}
+            </div>
+          </CardHeader>
 
-              <div className="ml-auto text-xs text-gray-500 dark:text-gray-200">
-                {filteredData.length}{" "}
-                {filteredData.length === 1 ? "empleado" : "empleados"}{" "}
-                encontrados
-              </div>
-            </div>
-          </div>
+          <CardContent className="p-4 sm:p-6 dark:bg-gray-800">
+            {/* Filtros y controles */}
+            <div className="mb-6 space-y-4">
+              <div className="flex flex-col sm:flex-row gap-3 justify-between items-center">
+                <div className="w-full sm:w-64">
+                  <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    BUSCAR
+                  </label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input
+                      type="text"
+                      placeholder="Buscar empleado..."
+                      className="w-full bg-white pl-9 dark:border-gray-600 dark:bg-gray-800 dark:text-white focus-visible:ring-gray-400 dark:focus-visible:ring-gray-500"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
+                </div>
 
-          {isLoading ? (
-            <div className="flex justify-center items-center py-20">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
-              <p className="ml-4 text-blue-600">Cargando empleados...</p>
-            </div>
-          ) : filteredData.length === 0 ? (
-            <div className="text-center py-10 text-gray-500">
-              {searchTerm || selectedRole !== "all"
-                ? "No se encontraron resultados para tu búsqueda"
-                : "No hay empleados registrados"}
-            </div>
-          ) : (
-            <>
-              {/* Cards para móvil */}
-              <div className="block md:hidden">
-                {paginatedData.map((employee) => (
-                  <EmployeeCard
-                    key={employee.id_empleado}
-                    employee={employee}
-                    onShow={handleShow}
-                    onUpdate={onUpdate}
-                    onDelete={onDelete}
+                <Button
+                  onClick={fetchEmpleados}
+                  disabled={isLoading}
+                  className="flex w-full items-center gap-2 bg-blue-600 hover:bg-blue-700 sm:w-auto"
+                >
+                  <RefreshCw
+                    className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
                   />
-                ))}
+                  Actualizar
+                </Button>
               </div>
 
-              {/* Tabla para desktop */}
-              <div className="hidden md:block">
-                {auth_service.hasPermission("ver-empleados") && (
-                  <Table
-                    headers={headers}
-                    data={paginatedData}
-                    onDelete={onDelete}
-                    onUpdate={onUpdate}
-                    onShow={handleShow}
-                  />
+              {/* Filtro por rol */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-gray-50 p-3 rounded-lg border border-gray-100 dark:border-gray-700 dark:bg-blue-900/20">
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-blue-primary" />
+                  <span className="text-sm font-medium">Filtrar por rol:</span>
+                </div>
+                <Select value={selectedRole} onValueChange={setSelectedRole}>
+                  <SelectTrigger className="w-full sm:w-[180px] bg-white dark:bg-gray-800">
+                    <SelectValue placeholder="Todos los roles" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos los roles</SelectItem>
+                    {roles.map((rol) => (
+                      <SelectItem key={rol.id_rol} value={String(rol.id_rol)}>
+                        {formatRoleName(rol.nombre)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {selectedRole !== "all" && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSelectedRole("all")}
+                    className="h-8 w-8 p-0 text-gray-500 hover:bg-gray-200 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white"
+                    aria-label="Limpiar filtro de rol"
+                    title="Limpiar filtro"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
                 )}
-              </div>
 
-              <div className="mt-4">
-                <Pagination count={filteredData.length} />
+                <div className="ml-auto text-xs text-gray-500 dark:text-gray-200">
+                  {filteredData.length}{" "}
+                  {filteredData.length === 1 ? "empleado" : "empleados"}{" "}
+                  encontrados
+                </div>
               </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
+            </div>
 
-      <ModalEmpleado
-        isVisible={modal}
-        data={dataUpd || null}
-        onClose={() => {
-          setModal(false);
-          setDataUpdate(null);
-          fetchEmpleados();
-        }}
-        onUpdateSuccess={handleUpdateSuccess}
-      />
-    </div>
+            {isLoading ? (
+              <div className="flex justify-center items-center py-20">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+                <p className="ml-4 text-blue-600">Cargando empleados...</p>
+              </div>
+            ) : filteredData.length === 0 ? (
+              <div className="text-center py-10 text-gray-500">
+                {searchTerm || selectedRole !== "all"
+                  ? "No se encontraron resultados para tu búsqueda"
+                  : "No hay empleados registrados"}
+              </div>
+            ) : (
+              <>
+                {/* Cards para móvil */}
+                <div className="block md:hidden">
+                  {paginatedData.map((employee) => (
+                    <EmployeeCard
+                      key={employee.id_empleado}
+                      employee={employee}
+                      onShow={handleShow}
+                      onUpdate={onUpdate}
+                      onDelete={onDelete}
+                      onToggleEstado={onToggleEstado}
+                    />
+                  ))}
+                </div>
+
+                {/* Tabla para desktop */}
+                <div className="hidden md:block">
+                  {auth_service.hasPermission("ver-empleados") && (
+                    <Table
+                      headers={headers}
+                      data={paginatedData}
+                      onDelete={onDelete}
+                      onUpdate={onUpdate}
+                      onShow={handleShow}
+                      onToggleEstado={onToggleEstado}
+                    />
+                  )}
+                </div>
+
+                <div className="mt-4">
+                  <Pagination count={filteredData.length} />
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
+        <ModalEmpleado
+          isVisible={modal}
+          data={dataUpd || null}
+          onClose={() => {
+            setModal(false);
+            setDataUpdate(null);
+            fetchEmpleados();
+          }}
+          onUpdateSuccess={handleUpdateSuccess}
+        />
+      </div>
     </RouteGuard>
   );
 }
