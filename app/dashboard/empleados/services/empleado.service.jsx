@@ -238,6 +238,39 @@ const empleado_service = {
       return { error: true, message: error.message };
     }
   },
+
+    cambiarEstado: async (id, estado) => {
+    try {
+      const response = await fetch(`${api_url}/${id}/estado`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          authorization: `Bearer ${getCookie("token")}`,
+        },
+        body: JSON.stringify({ estado }),
+      });
+
+      if (handlePermissionError(response)) {
+        return { error: true, status: 403 };
+      }
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        return {
+          status: response.status,
+          error: true,
+          message: data.errors?.estado?.[0] || data.message,
+        };
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error al cambiar estado del empleado:", error);
+      return { status: 500, error: true, message: error.message };
+    }
+  },
 };
 
 export default empleado_service;

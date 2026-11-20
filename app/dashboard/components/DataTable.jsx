@@ -17,9 +17,17 @@ const headerLabels = {
   dni: "DNI",
   telefono: "Teléfono",
   rol: "Rol",
+  estado: "Estado",
 };
 
-export default function DataTable({ headers, data, onDelete, onUpdate, onShow }) {
+export default function DataTable({
+  headers,
+  data,
+  onDelete,
+  onUpdate,
+  onShow,
+  onToggleEstado,
+}) {
   const router = useRouter()
   const [expandedRow, setExpandedRow] = useState(null)
 
@@ -47,6 +55,55 @@ export default function DataTable({ headers, data, onDelete, onUpdate, onShow })
     return !restrictedEmails.includes(dataRow.email)
   }
 
+  const renderEstadoCell = (dataRow) => {
+    const isActivo = Boolean(dataRow.estado)
+    const isEmpleadoAutenticado =
+      empleadoAutenticadoId && dataRow.id_empleado === empleadoAutenticadoId
+    const canToggle =
+      typeof onToggleEstado === "function" &&
+      !isEmpleadoAutenticado &&
+      verificarEditDelete(dataRow)
+
+    return (
+      <div className="inline-flex items-center justify-center gap-2">
+        {canToggle && (
+          <button
+            type="button"
+            role="switch"
+            aria-checked={isActivo}
+            title={isActivo ? "Desactivar empleado" : "Activar empleado"}
+            onClick={() => onToggleEstado(dataRow.id)}
+            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 ${
+              isActivo ? "bg-green-500" : "bg-gray-300 dark:bg-gray-600"
+            }`}
+          >
+            <span
+              className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform duration-200 ${
+                isActivo ? "translate-x-4.5" : "translate-x-1"
+              }`}
+            />
+          </button>
+        )}
+        <span
+          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+            isActivo
+              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+              : "bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+          }`}
+        >
+          {isActivo ? "Activo" : "Inactivo"}
+        </span>
+      </div>
+    )
+  }
+
+  const renderCellContent = (dataRow, header) => {
+    if (header === "estado") {
+      return renderEstadoCell(dataRow)
+    }
+    return dataRow[header]
+  }
+
   const renderMobileView = () => {
     return (
       <div className="grid gap-4 md:hidden ">
@@ -63,7 +120,7 @@ export default function DataTable({ headers, data, onDelete, onUpdate, onShow })
                 {headers.slice(0, 2).map((header) => (
                   <div key={`mobile-${dataRow.id}-${header}`} className="mb-1">
                     <span className="font-semibold text-xs text-gray-500 dark:bg-gray-900">{header.toUpperCase()}: </span>
-                    <span className="font-medium dark:bg-gray-900">{dataRow[header]}</span>
+                    <span className="font-medium dark:bg-gray-900">{renderCellContent(dataRow, header)}</span>
                   </div>
                 ))}
 
@@ -130,7 +187,7 @@ export default function DataTable({ headers, data, onDelete, onUpdate, onShow })
                   {headers.slice(2).map((header) => (
                     <div key={`mobile-expanded-${dataRow.id}-${header}`} className="mb-1">
                       <span className="font-semibold text-xs text-gray-500">{header.toUpperCase()}: </span>
-                      <span className="font-medium">{dataRow[header]}</span>
+                      <span className="font-medium">{renderCellContent(dataRow, header)}</span>
                     </div>
                   ))}
                 </div>
@@ -181,14 +238,14 @@ export default function DataTable({ headers, data, onDelete, onUpdate, onShow })
                     <TableCell
                       key={`${dataRow.id}-${header}`}
                       className={`px-3 py-5 text-center ${
-                        header === "nombre" || header === "apellido"
+                        header === "nombre" || header === "apellido" || header === "estado"
                           ? "whitespace-nowrap"
                           : header === "email"
                             ? "break-all"
                             : ""
                       }`}
                     >
-                      {dataRow[header]}
+                      {renderCellContent(dataRow, header)}
                     </TableCell>
                   ))}
                   <TableCell className="whitespace-nowrap px-3 py-5 text-center">
