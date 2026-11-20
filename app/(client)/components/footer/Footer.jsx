@@ -1,5 +1,7 @@
+"use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { SocialMedia } from "./SocialMedia";
 import {
   Phone,
@@ -11,7 +13,53 @@ import {
   Building2,
 } from "lucide-react";
 
+const serviceGroups = [
+  {
+    title: "Rotulación y Letreros Luminosos",
+    links: [
+      ["/productos/letras-acrilico", "Letras de Acrílico"],
+      ["/productos/letras-doradas", "Letras de Aluminio Doradas 3D"],
+      ["/productos/letras-plateadas", "Letras de Aluminio Plateadas 3D"],
+      ["/productos/letreros-luminosos", "Letreros Luminosos"],
+      ["/productos/neon-led", "Neón LED"],
+      ["/productos/cajas-luminosas", "Cajas Luminosas"],
+      ["/productos/letras-neon", "Letras de Neón en Tubos de Vidrio"],
+    ],
+  },
+  {
+    title: "Pantallas y Soluciones Digitales",
+    links: [
+      ["/productos/displays", "Monitores de Publicidad"],
+      ["/productos/pantalla-led", "Pantallas LED"],
+      ["/productos/holografico", "Holográfico"],
+      ["/productos/pixel-led", "Pixel LED"],
+      ["/productos/techos-led", "Techos LED"],
+    ],
+  },
+  {
+    title: "Impresión de Gran Formato",
+    links: [
+      ["/productos/impresion-vinilo", "Impresión en Vinilo"],
+      ["/productos/menu-board", "Menú Board"],
+    ],
+  },
+  {
+    title: "Mobiliario y Ambientación",
+    links: [
+      ["/productos/sillas-luminosas", "Sillas Luminosas"],
+      ["/productos/letras-pintadas", "Letras Pintadas en MDF"],
+    ],
+  },
+];
+
+function normalizePath(pathname) {
+  if (!pathname) return "/";
+  return pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
+}
+
 export default function Footer() {
+  const pathname = normalizePath(usePathname());
+
   return (
     <footer className="bg-[#000017] text-white rounded-t-[40px] overflow-hidden">
       {/* =========================================
@@ -20,178 +68,50 @@ export default function Footer() {
       <div className="py-12 px-6 lg:px-10">
         <div className="mx-auto max-w-7xl">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div>
-              <h3 className="text-white text-sm font-bold mb-4 uppercase tracking-wide">
-                Rotulación y Letreros Luminosos
-              </h3>
-              <ul className="flex flex-col gap-3 text-sm text-gray-300">
-                <li className="flex items-start gap-2">
-                  <span className="text-[#48A8FF] leading-[1.5] shrink-0">•</span>
-                  <Link
-                    href="/productos/letras-acrilico"
-                    className="hover:text-[#48A8FF] transition-colors"
+            {serviceGroups.map((group) => {
+              const groupActive = group.links.some(
+                ([href]) => normalizePath(href) === pathname,
+              );
+
+              return (
+                <div key={group.title}>
+                  <h3
+                    className={`text-sm font-bold mb-4 uppercase tracking-wide transition-colors ${
+                      groupActive ? "text-[#48A8FF]" : "text-white"
+                    }`}
                   >
-                    Letras de Acrílico
-                  </Link>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#48A8FF] leading-[1.5] shrink-0">•</span>
-                  <Link
-                    href="/productos/letras-doradas"
-                    className="hover:text-[#48A8FF] transition-colors"
-                  >
-                    Letras de Aluminio Doradas 3D
-                  </Link>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#48A8FF] leading-[1.5] shrink-0">•</span>
-                  <Link
-                    href="/productos/letras-plateadas"
-                    className="hover:text-[#48A8FF] transition-colors"
-                  >
-                    Letras de Aluminio Plateadas 3D
-                  </Link>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#48A8FF] leading-[1.5] shrink-0">•</span>
-                  <Link
-                    href="/productos/letreros-luminosos"
-                    className="hover:text-[#48A8FF] transition-colors"
-                  >
-                    Letreros Luminosos
-                  </Link>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#48A8FF] leading-[1.5] shrink-0">•</span>
-                  <Link
-                    href="/productos/neon-led"
-                    className="hover:text-[#48A8FF] transition-colors"
-                  >
-                    Neón LED
-                  </Link>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#48A8FF] leading-[1.5] shrink-0">•</span>
-                  <Link
-                    href="/productos/cajas-luminosas"
-                    className="hover:text-[#48A8FF] transition-colors"
-                  >
-                    Cajas Luminosas
-                  </Link>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#48A8FF] leading-[1.5] shrink-0">•</span>
-                  <Link
-                    href="/productos/letras-neon"
-                    className="hover:text-[#48A8FF] transition-colors"
-                  >
-                    Letras de Neón en Tubos de Vidrio
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-white text-sm font-bold mb-4 uppercase tracking-wide">
-                Pantallas y Soluciones Digitales
-              </h3>
-              <ul className="flex flex-col gap-3 text-sm text-gray-300">
-                <li className="flex items-start gap-2">
-                  <span className="text-[#48A8FF] leading-[1.5] shrink-0">•</span>
-                  <Link
-                    href="/productos/displays"
-                    className="hover:text-[#48A8FF] transition-colors"
-                  >
-                    Monitores de Publicidad
-                  </Link>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#48A8FF] leading-[1.5] shrink-0">•</span>
-                  <Link
-                    href="/productos/pantalla-led"
-                    className="hover:text-[#48A8FF] transition-colors"
-                  >
-                    Pantallas LED
-                  </Link>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#48A8FF] leading-[1.5] shrink-0">•</span>
-                  <Link
-                    href="/productos/holografico"
-                    className="hover:text-[#48A8FF] transition-colors"
-                  >
-                    Holográfico
-                  </Link>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#48A8FF] leading-[1.5] shrink-0">•</span>
-                  <Link
-                    href="/productos/pixel-led"
-                    className="hover:text-[#48A8FF] transition-colors"
-                  >
-                    Pixel LED
-                  </Link>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#48A8FF] leading-[1.5] shrink-0">•</span>
-                  <Link
-                    href="/productos/techos-led"
-                    className="hover:text-[#48A8FF] transition-colors"
-                  >
-                    Techos LED
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-white text-sm font-bold mb-4 uppercase tracking-wide">
-                Impresión de Gran Formato
-              </h3>
-              <ul className="flex flex-col gap-3 text-sm text-gray-300">
-                <li className="flex items-start gap-2">
-                  <span className="text-[#48A8FF] leading-[1.5] shrink-0">•</span>
-                  <Link
-                    href="/productos/impresion-vinilo"
-                    className="hover:text-[#48A8FF] transition-colors"
-                  >
-                    Impresión en Vinilo
-                  </Link>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#48A8FF] leading-[1.5] shrink-0">•</span>
-                  <Link
-                    href="/productos/menu-board"
-                    className="hover:text-[#48A8FF] transition-colors"
-                  >
-                    Menú Board
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-white text-sm font-bold mb-4 uppercase tracking-wide">
-                Mobiliario y Ambientación
-              </h3>
-              <ul className="flex flex-col gap-3 text-sm text-gray-300">
-                <li className="flex items-start gap-2">
-                  <span className="text-[#48A8FF] leading-[1.5] shrink-0">•</span>
-                  <Link
-                    href="/productos/sillas-luminosas"
-                    className="hover:text-[#48A8FF] transition-colors"
-                  >
-                    Sillas Luminosas
-                  </Link>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#48A8FF] leading-[1.5] shrink-0">•</span>
-                  <Link
-                    href="/productos/letras-pintadas"
-                    className="hover:text-[#48A8FF] transition-colors"
-                  >
-                    Letras Pintadas en MDF
-                  </Link>
-                </li>
-              </ul>
-            </div>
+                    {group.title}
+                  </h3>
+                  <ul className="flex flex-col gap-3 text-sm">
+                    {group.links.map(([href, label]) => {
+                      const isActive = normalizePath(href) === pathname;
+
+                      return (
+                        <li key={href} className="flex items-start gap-2">
+                          <span
+                            aria-hidden="true"
+                            className="leading-[1.5] shrink-0 text-[#48A8FF]"
+                          >
+                            •
+                          </span>
+                          <Link
+                            href={href}
+                            aria-current={isActive ? "page" : undefined}
+                            className={`transition-colors ${
+                              isActive
+                                ? "text-[#48A8FF] font-semibold"
+                                : "text-gray-300 hover:text-[#48A8FF]"
+                            }`}
+                          >
+                            {label}
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
