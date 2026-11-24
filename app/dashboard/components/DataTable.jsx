@@ -228,7 +228,7 @@ export default function DataTable({
                   key={dataRow.id || `row-${index}`}
                   className={`${
                     isEmpleadoAutenticado 
-                      ? "bg-[#caeafe] text-black" 
+                      ? "group bg-[#B1CCF6] text-black transition-colors hover:text-white"
                       : index % 2 === 0
                         ? "bg-white dark:bg-gray-900"
                         : "bg-gray-50 dark:bg-gray-700"

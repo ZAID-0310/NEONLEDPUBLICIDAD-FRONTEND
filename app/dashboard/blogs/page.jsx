@@ -33,6 +33,11 @@ import {
 } from "lucide-react";
 import auth_service from "../users/services/auth.service";
 
+const isBlogPublished = (blog) =>
+  blog.estado_publicacion === true ||
+  blog.estado_publicacion === 1 ||
+  blog.estado_publicacion === "1";
+
 export default function Page() {
   const [allBlogs, setAllBlogs] = useState([]);
   const [myBlogs, setMyBlogs] = useState([]);
@@ -103,7 +108,7 @@ export default function Page() {
 
     const query = debouncedSearchQuery.toLowerCase().trim();
     const filtered = sourceData.filter((blog) =>
-      blog.titulo.toLowerCase().includes(query),
+      String(blog.titulo ?? "").toLowerCase().includes(query),
     );
 
     setFilteredBlogs(filtered);
@@ -152,12 +157,8 @@ export default function Page() {
 
       if (responseTodos.status === 200 && responseMe.status === 200) {
         // Filtramos solo los publicados
-        const publicadosTodos = responseTodos.data.filter(
-          (blog) => blog.estado_publicacion === 1,
-        );
-        const publicadosMios = responseMe.data.filter(
-          (blog) => blog.estado_publicacion === 1,
-        );
+        const publicadosTodos = responseTodos.data.filter(isBlogPublished);
+        const publicadosMios = responseMe.data.filter(isBlogPublished);
 
         setAllBlogs(publicadosTodos);
         setMyBlogs(publicadosMios);
@@ -337,14 +338,14 @@ export default function Page() {
 
           <div className="flex flex-col lg:flex-row gap-3 w-full max-w-full min-w-0 lg:w-auto">
             {/* Buscador */}
-            <div className="w-full lg:w-64 lg:flex-shrink-0 min-w-0">
+            <div className="w-full lg:w-[370px] lg:flex-shrink-0 min-w-0">
               <div className="relative w-full min-w-0">
                 <input
                   type="text"
                   placeholder="Buscar por título (mín. 3 caracteres)..."
                   value={searchQuery}
                   onChange={handleSearch}
-                  className="w-full min-w-0 pl-10 pr-10 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                  className="w-full min-w-0 pl-10 pr-10 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
 
                 {/* Lupa centrada verticalmente */}
