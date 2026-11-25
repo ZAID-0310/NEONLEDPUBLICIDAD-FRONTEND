@@ -19,6 +19,7 @@ import {
   Mail,
   Phone,
   User,
+  X,
 } from "lucide-react";
 import Pagination1 from "../components/Pagination1";
 
@@ -486,7 +487,7 @@ export default function Page() {
 
   return (
     <RouteGuard>
-    <main className="p-3 sm:p-4 md:p-6 flex flex-col w-full min-h-screen bg-gray-50 dark:bg-gray-900">
+    <main className="p-3 sm:p-4 md:p-6 flex flex-col w-full min-h-full bg-gray-50 dark:bg-gray-900">
       <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-6 dark:bg-gray-800 dark:text-white">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <h1 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">
@@ -494,21 +495,32 @@ export default function Page() {
           </h1>
 
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-            <div className="relative flex-grow">
+            <div className="relative w-full sm:w-[325px]">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <input
                 type="text"
                 placeholder="Buscar por cliente, motivo o ID..."
-                className="pl-10 pr-4 py-2 w-full rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#8c52ff] focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                className="pl-10 pr-9 py-2 w-full rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={() => setSearchTerm("")}
+                  className="absolute right-2 top-1/2 z-10 -translate-y-1/2 text-gray-400 transition-colors hover:text-gray-600 dark:hover:text-gray-200"
+                  aria-label="Limpiar búsqueda"
+                  title="Limpiar búsqueda"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
             </div>
 
             <div className="flex gap-2 justify-end">
               <button
                 onClick={exportToCSV}
-                className="flex items-center gap-2 px-3 py-2 bg-green-50 text-green-600 rounded-lg border border-green-100 hover:bg-green-100 transition-colors dark:bg-green-900/20 dark:text-green-400"
+                className="flex items-center gap-2 px-3 py-2 bg-green-50 text-green-600 rounded-lg border border-green-100 hover:bg-green-100 transition-colors dark:bg-green-900/20 dark:text-green-400 dark:border-green-800/40 dark:hover:bg-green-900/40"
                 title="Exportar a CSV"
               >
                 <Download size={18} />
@@ -518,7 +530,7 @@ export default function Page() {
               <button
                 onClick={() => fetchContacts()}
                 disabled={isRefreshing}
-                className={`flex items-center gap-2 px-3 py-2 bg-blue-50 text-blue-600 rounded-lg border border-blue-100 hover:bg-blue-100 transition-colors dark:bg-blue-900/20 dark:text-blue-400 ${
+                className={`flex items-center gap-2 px-3 py-2 bg-blue-50 text-blue-600 rounded-lg border border-blue-100 hover:bg-blue-100 transition-colors dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/40 dark:hover:bg-blue-900/40 ${
                   isRefreshing ? "opacity-70 cursor-not-allowed" : ""
                 }`}
                 title="Actualizar datos"
