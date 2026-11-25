@@ -604,7 +604,7 @@ const Customer = () => {
 
   return (
     <RouteGuard>
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 dark:text-white p-3 sm:p-4 md:p-6 lg:p-8">
+    <div className="min-h-full bg-gray-100 dark:bg-gray-900 dark:text-white p-3 sm:p-4 md:p-6 lg:p-8">
       <AlertNotification
         alert={alert}
         onClose={() => setAlert((prev) => ({ ...prev, show: false }))}
@@ -638,18 +638,18 @@ const Customer = () => {
           {/* Búsqueda */}
           <div className="mb-6">
             <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4">
-              <div className="flex-1 sm:max-w-md">
+              <div className="w-full sm:w-64">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   BUSCAR
                 </label>
                 <div className="relative">
                   <Search
                     className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500"
-                    size={20}
+                    size={16}
                   />
                   <Input
                     type="text"
-                    placeholder="Nombre del cliente"
+                    placeholder="Nombre del cliente..."
                     value={state.searchTerm}
                     onChange={(e) =>
                       setState((prev) => ({
@@ -657,8 +657,21 @@ const Customer = () => {
                         searchTerm: e.target.value,
                       }))
                     }
-                    className="w-full pl-10 bg-white dark:bg-gray-800 dark:text-white dark:border-gray-600"
+                    className="w-full pl-9 pr-9 bg-white dark:bg-gray-800 dark:text-white dark:border-gray-600 focus-visible:ring-[#6B7280] dark:focus-visible:ring-gray-500"
                   />
+                  {state.searchTerm && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setState((prev) => ({ ...prev, searchTerm: "" }))
+                      }
+                      className="absolute right-2 top-1/2 z-10 -translate-y-1/2 text-gray-400 transition-colors hover:text-gray-600 dark:hover:text-gray-200"
+                      aria-label="Limpiar búsqueda"
+                      title="Limpiar búsqueda"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
                 </div>
               </div>
               <Button

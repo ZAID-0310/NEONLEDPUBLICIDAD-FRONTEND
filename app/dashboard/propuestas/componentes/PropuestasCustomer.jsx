@@ -196,8 +196,8 @@ const PropuestasCustomer = () => {
           <div className="bg-gray-200 dark:bg-gray-800 rounded-b-2xl p-4 sm:p-6 md:p-8">
             {/* Filtros */}
             <div className="mb-6">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div>
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-[276px_290px_190px_auto] gap-4">
+                <div className="w-full">
                   <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">
                     BUSCAR POR NOMBRE
                   </label>
@@ -208,16 +208,18 @@ const PropuestasCustomer = () => {
                     />
                     <input
                       type="text"
-                      placeholder="Nombre de la propuesta"
+                      placeholder="Nombre de la propuesta..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:outline-none bg-white dark:bg-gray-700 dark:text-white"
+                      className="h-10 w-full pl-10 pr-9 py-0 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:outline-none bg-white dark:bg-gray-700 dark:text-white"
                     />
                     {searchTerm && (
                       <button
                         type="button"
                         onClick={() => setSearchTerm("")}
-                        className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        className="absolute right-2 top-1/2 z-10 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                        aria-label="Limpiar búsqueda de propuestas"
+                        title="Limpiar búsqueda"
                       >
                         <X size={16} />
                       </button>
@@ -225,7 +227,7 @@ const PropuestasCustomer = () => {
                   </div>
                 </div>
 
-                <div>
+                <div className="w-full">
                   <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">
                     BUSCAR POR CLIENTE
                   </label>
@@ -237,7 +239,7 @@ const PropuestasCustomer = () => {
                       />
                       <input
                         type="text"
-                        placeholder="Buscar por nombre de cliente o email"
+                        placeholder="Buscar por cliente o email..."
                         value={customerSearchTerm}
                         onChange={(e) => {
                           setCustomerSearchTerm(e.target.value);
@@ -247,13 +249,15 @@ const PropuestasCustomer = () => {
                         onBlur={() =>
                           setTimeout(() => setShowCustomerDropdown(false), 200)
                         }
-                        className="w-full pl-10 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:outline-none bg-white dark:bg-gray-700 dark:text-white"
+                        className="h-10 w-full pl-10 pr-9 py-0 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:outline-none bg-white dark:bg-gray-700 dark:text-white"
                       />
                       {customerSearchTerm && (
                         <button
                           type="button"
                           onClick={clearCustomerSelection}
-                          className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                          className="absolute right-2 top-1/2 z-10 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                          aria-label="Limpiar búsqueda de clientes"
+                          title="Limpiar búsqueda"
                         >
                           <X size={16} />
                         </button>
@@ -286,7 +290,7 @@ const PropuestasCustomer = () => {
                   </label>
                   <input
                     type="date"
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:outline-none bg-white dark:bg-gray-700 dark:text-white dark:[color-scheme:dark]"
+                    className="h-10 w-full max-w-[180px] px-3 py-0 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:outline-none bg-white dark:bg-gray-700 dark:text-white dark:[color-scheme:dark] [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                     value={selectedDate}
                     onChange={(e) => setSelectedDate(e.target.value)}
                   />

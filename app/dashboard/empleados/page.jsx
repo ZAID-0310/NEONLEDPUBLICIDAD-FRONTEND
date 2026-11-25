@@ -501,10 +501,21 @@ export default function Page() {
                     <Input
                       type="text"
                       placeholder="Buscar empleado..."
-                      className="w-full bg-white pl-9 dark:border-gray-600 dark:bg-gray-800 dark:text-white focus-visible:ring-gray-400 dark:focus-visible:ring-gray-500"
+                      className="w-full bg-white pl-9 pr-9 dark:border-gray-600 dark:bg-gray-800 dark:text-white focus-visible:ring-gray-400 dark:focus-visible:ring-gray-500"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                     />
+                    {searchTerm && (
+                      <button
+                        type="button"
+                        onClick={() => setSearchTerm("")}
+                        className="absolute right-2 top-1/2 z-10 -translate-y-1/2 text-gray-400 transition-colors hover:text-gray-600 dark:hover:text-gray-200"
+                        aria-label="Limpiar búsqueda"
+                        title="Limpiar búsqueda"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    )}
                   </div>
                 </div>
 
