@@ -325,7 +325,7 @@ export default function RootLayout({ children }) {
         {/* Main content */}
         <div
           className={`flex flex-col flex-1 min-w-0 ${
-            isSidebarOpen ? "ml-20 lg:ml-64" : "ml-20" 
+            isSidebarOpen ? "ml-20 lg:ml-64 blur-sm lg:blur-none" : "ml-20" 
           } transition-all duration-300`}
         >
           {/* Header */}
