@@ -1,9 +1,11 @@
 "use client";
 import Link from "next/link";
 import AuthGuard from "./components/AuthGuard";
+import { Suspense } from 'react';
 import auth_service from "./users/services/auth.service";
 import { usePathname } from "next/navigation";
 import { getCookie } from "cookies-next";
+import { getUserRoleString } from '@/lib/utils/auth';
 import { useState, useEffect } from "react";
 import { DisplayNameContext } from "./components/DisplayNameContext";
 import { safeJsonParse } from "@/lib/safe-json";
@@ -26,8 +28,21 @@ export default function RootLayout({ children }) {
   const pathname = usePathname();
   const { logout, user } = useAuth();
 
-  // Info usuario y rol (usando el contexto, no cookies)
-  const userRole = user?.rol || "Usuario";
+  const getUserRole = () => {
+    if (!user) return null;
+
+    let rawRole = user.rol || user.role; 
+
+    if (!rawRole) return null;
+
+    
+    return rawRole.toString().toLowerCase().trim();
+  };
+
+
+  const cleanUserRole = getUserRole() || "Usuario"; 
+
+  const currentUserRole = getUserRoleString(user); 
   const userData = safeJsonParse(getCookie("user"), { name: "Usuario" });
   const empleadoData = safeJsonParse(getCookie("empleado"), null);
 
@@ -38,6 +53,8 @@ export default function RootLayout({ children }) {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+
+  
 
   // Actualizar nombre si las cookies cargan después
   useEffect(() => {
@@ -74,6 +91,8 @@ export default function RootLayout({ children }) {
     }
   };
 
+ 
+
   const getSectionName = () => {
     const normalizedPathname =
       pathname.length > 1 ? pathname.replace(/\/$/, "") : pathname;
@@ -81,7 +100,7 @@ export default function RootLayout({ children }) {
     const matchedLink = dashboardLinks.find(
       (link) =>
         link.href === normalizedPathname &&
-        (!link.role || link.role === userRole),
+        (!link.role || link.role.toLowerCase().trim() === cleanUserRole)
     );
     if (matchedLink) return matchedLink.title;
 
@@ -96,30 +115,33 @@ export default function RootLayout({ children }) {
     );
   };
 
-  // Solo decide qué links MOSTRAR (usando user.rol)
   const shouldShowLink = (link) => {
-    const currentRole = user?.rol?.toLowerCase()?.trim();
-
-    if (!currentRole) return false;
+    if (!currentUserRole) return false;
 
     if (link.roles && link.roles.length > 0) {
-      return link.roles.some(
-        (r) => r.toLowerCase().trim() === currentRole
-      );
+      const allowedRolesNormalized = link.roles.map(r => r.toString().toLowerCase().trim());
+      return allowedRolesNormalized.includes(currentUserRole);
     }
-    if (link.role && link.role.toLowerCase().trim() !== currentRole) {
-      return false;
+
+    if (link.role) {
+      const requiredRoleNormalized = link.role.toString().toLowerCase().trim();
+      return currentUserRole === requiredRoleNormalized;
     }
-    if (link.permission && !auth_service.hasPermission(link.permission)) {
-      return false;
-    }
-    if (link.requiresVerifiedAccount && !auth_service.isVerifiedAccount()) {
-      return false;
-    }
+
+    if (link.permission && !auth_service.hasPermission(link.permission)) return false;
+    
     return true;
   };
 
   return (
+    <AuthGuard>
+      <Suspense 
+        fallback={
+          <div className="flex h-screen w-full items-center justify-center bg-gray-50 dark:bg-gray-900">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
+          </div>
+        }
+      >
     <DisplayNameContext.Provider
       value={{ displayName, updateDisplayName: setDisplayName }}
     >
@@ -189,7 +211,7 @@ export default function RootLayout({ children }) {
                       {displayName}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                      {userRole}
+                      {cleanUserRole}
                     </p>
                   </div>
                 </div>
@@ -303,7 +325,7 @@ export default function RootLayout({ children }) {
         {/* Main content */}
         <div
           className={`flex flex-col flex-1 min-w-0 ${
-            isSidebarOpen ? "ml-20 lg:ml-64" : "ml-20" 
+            isSidebarOpen ? "ml-20 lg:ml-64 blur-sm lg:blur-none" : "ml-20" 
           } transition-all duration-300`}
         >
           {/* Header */}
@@ -315,7 +337,7 @@ export default function RootLayout({ children }) {
 
           {/* Page content */}
           <main className="main-scroll flex-1 overflow-y-auto overflow-x-hidden bg-gray-50 dark:bg-gray-900 p-0">
-            <AuthGuard>{children}</AuthGuard> {/* 👈 AQUÍ ESTÁ NUESTRA SEGURIDAD */}
+            {children}
           </main>
         </div>
       </div>
@@ -361,6 +383,8 @@ export default function RootLayout({ children }) {
         </DialogContent>
       </Dialog>
     </DisplayNameContext.Provider>
+    </Suspense>
+    </AuthGuard>
   );
 }
 
