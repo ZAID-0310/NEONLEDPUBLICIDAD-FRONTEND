@@ -7,10 +7,47 @@ export default function Banner({ titulo, video, imagen }) {
 
   // Asegura la reproducción en navegadores estrictos tras la hidratación de Next.js
   useEffect(() => {
-    if (video && videoRef.current) {
-      videoRef.current.muted = true;
-      //videoRef.current.play().catch((err) => console.log("Autoplay demorado:", err));
+    const videoEl = videoRef.current;
+    if (!video || !videoEl) return;
+
+    videoEl.muted = true;
+    videoEl.defaultMuted = true;
+
+    const playPromise = videoEl.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(() => {
+        const handleInteraction = () => {
+          videoEl.play().catch(() => { });
+          window.removeEventListener("touchstart", handleInteraction);
+          window.removeEventListener("click", handleInteraction);
+        };
+        window.addEventListener("touchstart", handleInteraction, {
+          once: true,
+          passive: true,
+        });
+        window.addEventListener("click", handleInteraction, {
+          once: true,
+          passive: true,
+        });
+      });
     }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          videoEl.play().catch(() => { });
+        } else {
+          videoEl.pause();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(videoEl);
+
+    return () => {
+      observer.disconnect();
+    };
   }, [video]);
 
   const handleArrowClick = () => {
@@ -26,11 +63,12 @@ export default function Banner({ titulo, video, imagen }) {
         {video ? (
           <video
             ref={videoRef}
-            className="w-full h-full object-cover select-none"
+            className="w-full h-full object-cover select-none pointer-events-none"
+            autoPlay
             loop
             muted
             playsInline
-            preload="auto"
+            preload="metadata"
             controls={false}
           >
             <source src={video} type="video/mp4" />
